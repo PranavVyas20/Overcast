@@ -55,7 +55,7 @@ class WeatherViewModel @Inject constructor(
     val currentWeatherGraph get() = _currentWeatherGraphDataState
 
     private val producer = ChartEntryModelProducer()
-    private var timeStampMap: MutableMap<Float, Float> = mutableMapOf()
+    private var timeStampMap: MutableMap<Float, String> = mutableMapOf()
     private val markerMap: MutableMap<Float, Marker> = mutableMapOf()
 
     private fun convertTempToCelcius(kTemp: Double): Double {
@@ -142,12 +142,13 @@ class WeatherViewModel @Inject constructor(
                             y = hourlyForecastItem.temp!!.toFloat()
                         )
                         // 2f pe map hai 2.3f
-                        timeStampMap[hourlyForecastGraphItem.x] = xCoordinate.toFloat()
+                        timeStampMap[hourlyForecastGraphItem.x] = hourlyForecastItem.timeString.toString()
 
                         hourlyForecastGraphPoints.add(hourlyForecastGraphItem)
                     }
-                    _todayHourlyForecastState.value =
-                        UIState(isLoading = false, data = hourlyForecast)
+                    Log.d("weatherMap", timeStampMap.toString())
+
+                    _todayHourlyForecastState.value = UIState(isLoading = false, data = hourlyForecast)
                     producer.setEntries(hourlyForecastGraphPoints)
                     _currentWeatherGraphDataState.value = UIState(
                         isLoading = false,

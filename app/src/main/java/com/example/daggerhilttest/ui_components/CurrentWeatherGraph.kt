@@ -57,11 +57,7 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?) {
             currentWeatherGraph.markerMap!![key] = marker()
         }
         axisValueFormatter = AxisValueFormatter { i, j ->
-            if(currentWeatherGraph.timeStampMap[i] != i) {
-                "${currentWeatherGraph.timeStampMap[i]}0 hrs"
-            } else {
-                "$i hrs"
-            }
+            currentWeatherGraph.timeStampMap[i].toString()
         }
         Card(
             modifier = Modifier
@@ -95,7 +91,7 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?) {
                 modifier = Modifier
                     .wrapContentSize()
                     .background(Color.White),
-//                startAxis = startAxis(),
+                startAxis = startAxis(),
                 bottomAxis = bottomAxis(valueFormatter = axisValueFormatter)
             )
         }
