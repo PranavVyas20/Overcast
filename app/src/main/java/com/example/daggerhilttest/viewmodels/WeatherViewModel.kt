@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.daggerhilttest.constants.Constants
 import com.example.daggerhilttest.models.CurrentWeather
 import com.example.daggerhilttest.models.CurrentWeatherGraph
+import com.example.daggerhilttest.models.HourlyForecast
 import com.example.daggerhilttest.models.HourlyForecastLocal
 import com.example.daggerhilttest.repository.WeatherRepository
+import com.example.daggerhilttest.util.Resource
 import com.example.daggerhilttest.util.getMarker
 import com.example.daggerhilttest.util.marker
 import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
@@ -42,7 +44,6 @@ class WeatherViewModel @Inject constructor(
         HourlyForecastLocal(0.0, "", ""),
         HourlyForecastLocal(0.0, "", "")
     )
-
     private val _currentWeatherState = mutableStateOf<UIState<CurrentWeather>>(UIState())
     val currentWeatherState get() = _currentWeatherState
 
@@ -50,13 +51,13 @@ class WeatherViewModel @Inject constructor(
         mutableStateOf<UIState<List<HourlyForecastLocal>>>(UIState(data = tempList))
     val todayHourlyForecast get() = _todayHourlyForecastState
 
-    private val _currentWeatherGraphDataState =
-        mutableStateOf<UIState<CurrentWeatherGraph>>(UIState())
-    val currentWeatherGraph get() = _currentWeatherGraphDataState
-
     private val producer = ChartEntryModelProducer()
     private var timeStampMap: MutableMap<Float, String> = mutableMapOf()
     private val markerMap: MutableMap<Float, Marker> = mutableMapOf()
+
+    private val _currentWeatherGraphDataState =
+        mutableStateOf<UIState<CurrentWeatherGraph>>(UIState(data = CurrentWeatherGraph(producer,timeStampMap, markerMap)))
+    val currentWeatherGraph get() = _currentWeatherGraphDataState
 
     private fun convertTempToCelcius(kTemp: Double): Double {
         val cel = kTemp - 273
@@ -83,6 +84,42 @@ class WeatherViewModel @Inject constructor(
         return sdf.format(netDate)
     }
 
+    private fun handleGraphPointsCreation(forecastList: List<CurrentWeather>, hourlyForecast:MutableList<HourlyForecastLocal>, hourlyForecastGraphPoints: MutableList<FloatEntry>) {
+        var prevTime = 0f
+
+        for (i in 0..7) {
+            val currentWeatherItem = forecastList[i]
+
+            val hourlyForecastItem = HourlyForecastLocal(
+                temp = convertTempToCelcius(currentWeatherItem.mainTempData!!.temp!!),
+                iconUrl = "${Constants.BASE_ICON_URL}${
+                    currentWeatherItem.weatherList?.get(
+                        0
+                    )?.icon
+                }@4x.png",
+                timeString = getTimeFromUnix(currentWeatherItem.unixTime!!),
+                timeFloatHrs = getTimeFromUnixHrs(currentWeatherItem.unixTime).toFloat()
+            )
+            hourlyForecast.add(hourlyForecastItem)
+
+            val xCoordinate = if (hourlyForecastItem.timeFloatHrs!! < prevTime) {
+                (hourlyForecastItem.timeFloatHrs + 24.0)
+            } else {
+                hourlyForecastItem.timeFloatHrs
+            }
+
+            prevTime = xCoordinate.toInt().toFloat()
+            val hourlyForecastGraphItem = FloatEntry(
+                x = xCoordinate.toInt().toFloat(),
+                y = hourlyForecastItem.temp!!.toFloat()
+            )
+            // 2f pe map hai 2.3f
+            timeStampMap[hourlyForecastGraphItem.x] =
+                hourlyForecastItem.timeString.toString()
+
+            hourlyForecastGraphPoints.add(hourlyForecastGraphItem)
+        }
+    }
     suspend fun getCurrentWeather(city: String) {
         weatherRepository.getCurrentWeatherByCity(city).onEach { result ->
             when (result.status) {
@@ -104,52 +141,27 @@ class WeatherViewModel @Inject constructor(
 
     private suspend fun getTodayWeatherForecastByCity(city: String) {
         weatherRepository.getHourlyForecastByCity(city).onEach { result ->
-            when (result.status) {
 
+            when (result.status) {
                 Constants.WeatherApiStatus.STATUS_LOADING -> {
                     _todayHourlyForecastState.value = UIState(data = tempList, isLoading = true)
+
+                    producer.setEntries(listOf<FloatEntry>())
+                    _currentWeatherGraphDataState.value =
+                        UIState(data = CurrentWeatherGraph(producer, timeStampMap, markerMap))
                 }
                 Constants.WeatherApiStatus.STATUS_SUCCESS -> {
                     val hourlyForecast = mutableListOf<HourlyForecastLocal>()
                     val hourlyForecastGraphPoints = mutableListOf<FloatEntry>()
 
-                    var prevTime = 0f
+                    handleGraphPointsCreation(result.data!!.forecastList!!, hourlyForecast, hourlyForecastGraphPoints)
 
-                    for (i in 0..7) {
-                        val currentWeatherItem = result.data!!.forecastList!![i]
-
-                        val hourlyForecastItem = HourlyForecastLocal(
-                            temp = convertTempToCelcius(currentWeatherItem.mainTempData!!.temp!!),
-                            iconUrl = "${Constants.BASE_ICON_URL}${
-                                currentWeatherItem.weatherList?.get(
-                                    0
-                                )?.icon
-                            }@4x.png",
-                            timeString = getTimeFromUnix(currentWeatherItem.unixTime!!),
-                            timeFloatHrs = getTimeFromUnixHrs(currentWeatherItem.unixTime).toFloat()
-                        )
-                        hourlyForecast.add(hourlyForecastItem)
-
-                        val xCoordinate = if (hourlyForecastItem.timeFloatHrs!! < prevTime) {
-                            (hourlyForecastItem.timeFloatHrs + 24.0)
-                        } else {
-                            hourlyForecastItem.timeFloatHrs
-                        }
-
-                        prevTime = xCoordinate.toInt().toFloat()
-                        val hourlyForecastGraphItem = FloatEntry(
-                            x = xCoordinate.toInt().toFloat(),
-                            y = hourlyForecastItem.temp!!.toFloat()
-                        )
-                        // 2f pe map hai 2.3f
-                        timeStampMap[hourlyForecastGraphItem.x] = hourlyForecastItem.timeString.toString()
-
-                        hourlyForecastGraphPoints.add(hourlyForecastGraphItem)
-                    }
                     Log.d("weatherMap", timeStampMap.toString())
 
-                    _todayHourlyForecastState.value = UIState(isLoading = false, data = hourlyForecast)
+                    _todayHourlyForecastState.value =
+                        UIState(isLoading = false, data = hourlyForecast)
                     producer.setEntries(hourlyForecastGraphPoints)
+
                     _currentWeatherGraphDataState.value = UIState(
                         isLoading = false,
                         data = CurrentWeatherGraph(producer, timeStampMap, markerMap)

@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -50,28 +51,30 @@ private var axisValueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bott
 
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
-fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?) {
+fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?, visibility: Boolean) {
 
-    if(currentWeatherGraph!=null) {
+    if (currentWeatherGraph != null) {
         currentWeatherGraph.timeStampMap!!.forEach { (key, _) ->
             currentWeatherGraph.markerMap!![key] = marker()
         }
         axisValueFormatter = AxisValueFormatter { i, j ->
             currentWeatherGraph.timeStampMap[i].toString()
         }
-        Card(
-            modifier = Modifier
-                .padding(10.dp)
-                .wrapContentHeight()
-            /*            .placeholder(
-                visible = false,
+    }
+    Card(
+        modifier = Modifier
+            .padding(10.dp)
+            .wrapContentHeight()
+            .placeholder(
+                visible = visibility,
                 color = shimmerColor,
                 shape = RoundedCornerShape(7.dp),
                 highlight = PlaceholderHighlight.shimmer(
                     highlightColor = Color.White,
                 )
-            )*/
-        ) {
+            )
+    ) {
+        if(currentWeatherGraph != null) {
             Chart(
                 chart = lineChart(
                     lines = listOf(
@@ -95,5 +98,6 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?) {
                 bottomAxis = bottomAxis(valueFormatter = axisValueFormatter)
             )
         }
+
     }
 }

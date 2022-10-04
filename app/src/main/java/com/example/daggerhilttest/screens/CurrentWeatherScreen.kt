@@ -43,7 +43,6 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
     val todayHourlyForecastState = weatherViewModel.todayHourlyForecast.value
     val currentWeatherGraphState = weatherViewModel.currentWeatherGraph.value
 
-
     Column(
         Modifier
             .padding(10.dp)
@@ -90,7 +89,7 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
                 )
             }
         }
-        CurrentWeatherGraph(currentWeatherGraphState.data)
+        CurrentWeatherGraph(currentWeatherGraphState.data, currentWeatherGraphState.isLoading)
         BottomButtonLayout()
     }
 }
