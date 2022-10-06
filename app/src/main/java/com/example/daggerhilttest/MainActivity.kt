@@ -22,18 +22,21 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import com.example.daggerhilttest.constants.Constants.USER_PREFERENCES_NAME
+import com.example.daggerhilttest.models.LatLong
 import com.example.daggerhilttest.models.Weather
 import com.example.daggerhilttest.screens.CurrentWeatherScreen
 import com.example.daggerhilttest.ui.theme.DaggerHiltTestTheme
 import com.example.daggerhilttest.ui_components.WeatherTest
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    lateinit var latLong: LatLong
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,16 +48,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color(0xFFF5F6F8)
                 ) {
-//                    Toast.makeText(this, "${latLong.lat.toString()} ${latLong.long.toString()}",Toast.LENGTH_SHORT).show()
                     // if(!dataStore.hasLatLong) {
                     //      hasLocationAccess = viewmodel.requestForLocation(),
                     //      also save location coord in datastore when access granted
                     // }
                     // Else:
-//                    CurrentWeatherScreen(weatherViewModel)
+                    CurrentWeatherScreen(weatherViewModel)
                 }
             }
-
         }
     }
 }

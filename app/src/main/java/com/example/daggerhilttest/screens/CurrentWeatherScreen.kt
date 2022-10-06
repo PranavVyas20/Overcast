@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import com.example.daggerhilttest.models.HourlyForecastLocal
 import com.example.daggerhilttest.models.HourlyForecastTest
 import com.example.daggerhilttest.ui.theme.shimmerColor
@@ -31,13 +32,31 @@ import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatryk.vico.core.entry.FloatEntry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
+    val savedLatLongState = weatherViewModel.savedLatLong.value
+    Log.d("tagss", savedLatLongState.lat.toString() + savedLatLongState.long.toString())
 
-    LaunchedEffect(key1 = Unit) {
-        weatherViewModel.getCurrentWeatherByLatLong(26.3898f, 75.8708f)
+    LaunchedEffect(key1 = savedLatLongState) {
+        weatherViewModel.getLatLongFromDataStorePref()
+
+        if(savedLatLongState.lat != null) {
+            // Need to add one more check here !
+            // just need to add a bool in view model, to keep track if recomposition is due to :
+            // a - city api call
+            // b - location access
+            // c - refresh location
+            weatherViewModel.getCurrentWeatherByLatLong(savedLatLongState.lat!!.toFloat(), savedLatLongState.long!!.toFloat())
+        }
+        else {
+            weatherViewModel.requestLocationAccess()
+        }
     }
     val currentWeatherState = weatherViewModel.currentWeatherState.value
     val todayHourlyForecastState = weatherViewModel.todayHourlyForecast.value

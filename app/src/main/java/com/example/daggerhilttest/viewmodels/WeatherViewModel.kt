@@ -51,6 +51,9 @@ class WeatherViewModel @Inject constructor(
     )
     private val _currentWeatherState = mutableStateOf<UIState<CurrentWeather>>(UIState())
     val currentWeatherState get() = _currentWeatherState
+    
+    private val _savedLatLongState = mutableStateOf(LatLong())
+    val savedLatLong get() = _savedLatLongState
 
     private val _todayHourlyForecastState =
         mutableStateOf<UIState<List<HourlyForecastLocal>>>(UIState(data = tempList))
@@ -77,12 +80,11 @@ class WeatherViewModel @Inject constructor(
         return (cel * 10.0).roundToInt() / 10.0
     }
 
-    suspend fun getLatLongFromDataStorePref(): LatLong {
-        val latLong = LatLong()
+    suspend fun getLatLongFromDataStorePref() {
         val preferences = dataStorePref.data.first()
-        latLong.lat = preferences[PreferencesKeys.SAVED_LAT] ?: 0.0
-        latLong.long = preferences[PreferencesKeys.SAVED_LONG] ?: 0.0
-        return latLong
+        val lat = preferences[PreferencesKeys.SAVED_LAT]
+        val long = preferences[PreferencesKeys.SAVED_LONG]
+        _savedLatLongState.value = LatLong(lat, long)
     }
 
     suspend fun saveLatLongInDataStorePref(lat: Double, long: Double) {
@@ -90,6 +92,7 @@ class WeatherViewModel @Inject constructor(
             preferences[PreferencesKeys.SAVED_LAT] = lat
             preferences[PreferencesKeys.SAVED_LONG] = long
         }
+        _savedLatLongState.value = LatLong(lat, long)
     }
 
     private fun getDateFromUnix(unixTime: Long): String {
@@ -153,6 +156,12 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
+    suspend fun requestLocationAccess(){
+        Log.d("tagss", "requesting location")
+        // got location access and save it to data store pref
+        saveLatLongInDataStorePref(1.1,2.3)
+//        _savedLatLongState.value = LatLong(1.1, 2.3)
+    }
     suspend fun getCurrentWeatherByCity(city: String) {
         weatherRepository.getCurrentWeatherByCity(city).onEach { result ->
             when (result.status) {
