@@ -1,5 +1,6 @@
 package com.example.daggerhilttest
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +18,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
+import com.example.daggerhilttest.constants.Constants.USER_PREFERENCES_NAME
 import com.example.daggerhilttest.models.Weather
 import com.example.daggerhilttest.screens.CurrentWeatherScreen
 import com.example.daggerhilttest.ui.theme.DaggerHiltTestTheme
@@ -41,7 +45,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color(0xFFF5F6F8)
                 ) {
-                    CurrentWeatherScreen(weatherViewModel)
+//                    Toast.makeText(this, "${latLong.lat.toString()} ${latLong.long.toString()}",Toast.LENGTH_SHORT).show()
+                    // if(!dataStore.hasLatLong) {
+                    //      hasLocationAccess = viewmodel.requestForLocation(),
+                    //      also save location coord in datastore when access granted
+                    // }
+                    // Else:
+//                    CurrentWeatherScreen(weatherViewModel)
                 }
             }
 

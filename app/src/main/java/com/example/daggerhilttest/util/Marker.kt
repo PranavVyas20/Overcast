@@ -84,7 +84,7 @@ internal fun getMarker(
     return object : MarkerComponent(
         label = label,
         indicator = indicator,
-        guideline = guideline,
+        guideline = null,
     ) {
         init {
             indicatorSizeDp = INDICATOR_SIZE_DP

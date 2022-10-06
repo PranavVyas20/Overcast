@@ -37,7 +37,7 @@ import com.patrykandpatryk.vico.core.entry.FloatEntry
 fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
 
     LaunchedEffect(key1 = Unit) {
-        weatherViewModel.getCurrentWeather("Banasthali")
+        weatherViewModel.getCurrentWeatherByLatLong(26.3898f, 75.8708f)
     }
     val currentWeatherState = weatherViewModel.currentWeatherState.value
     val todayHourlyForecastState = weatherViewModel.todayHourlyForecast.value

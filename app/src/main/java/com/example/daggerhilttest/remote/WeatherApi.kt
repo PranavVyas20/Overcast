@@ -19,4 +19,18 @@ interface WeatherApi {
         @Query("q") city:String,
         @Query("appid") apiKey:String
     ): Response<HourlyForecast>
+
+    @GET("weather")
+    suspend fun getCurrentWeatherByLatLong(
+        @Query("lat") lat: Float,
+        @Query("lon") long: Float,
+        @Query("appid") apiKey: String
+    ): Response<CurrentWeather>
+
+    @GET("forecast")
+    suspend fun getHourlyForecastByLatLong(
+        @Query("lat") lat: Float,
+        @Query("lon") long: Float,
+        @Query("appid") apiKey: String
+    ): Response<HourlyForecast>
 }

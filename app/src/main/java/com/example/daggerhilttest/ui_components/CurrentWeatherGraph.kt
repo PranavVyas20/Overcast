@@ -98,6 +98,5 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?, visibility: B
                 bottomAxis = bottomAxis(valueFormatter = axisValueFormatter)
             )
         }
-
     }
 }
