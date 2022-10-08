@@ -1,4 +1,4 @@
-package com.example.daggerhilttest
+package com.example.daggerhilttest.activities
 
 import android.content.Context
 import android.os.Build
@@ -28,6 +28,7 @@ import com.example.daggerhilttest.screens.CurrentWeatherScreen
 import com.example.daggerhilttest.ui.theme.DaggerHiltTestTheme
 import com.example.daggerhilttest.ui_components.WeatherTest
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
+import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -36,11 +37,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    lateinit var latLong: LatLong
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             DaggerHiltTestTheme {
                 val weatherViewModel = hiltViewModel<WeatherViewModel>()
@@ -48,11 +47,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color(0xFFF5F6F8)
                 ) {
-                    // if(!dataStore.hasLatLong) {
-                    //      hasLocationAccess = viewmodel.requestForLocation(),
-                    //      also save location coord in datastore when access granted
-                    // }
-                    // Else:
                     CurrentWeatherScreen(weatherViewModel)
                 }
             }

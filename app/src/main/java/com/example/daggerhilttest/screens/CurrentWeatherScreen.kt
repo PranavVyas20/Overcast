@@ -1,5 +1,6 @@
 package com.example.daggerhilttest.screens
 
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +32,7 @@ import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import com.google.android.gms.location.LocationServices
 import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatryk.vico.core.entry.FloatEntry
 import kotlinx.coroutines.CoroutineScope
@@ -41,26 +44,20 @@ import kotlinx.coroutines.launch
 @Composable
 fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
     val savedLatLongState = weatherViewModel.savedLatLong.value
-    Log.d("tagss", savedLatLongState.lat.toString() + savedLatLongState.long.toString())
-
-    LaunchedEffect(key1 = savedLatLongState) {
-        weatherViewModel.getLatLongFromDataStorePref()
-
-        if(savedLatLongState.lat != null) {
-            // Need to add one more check here !
-            // just need to add a bool in view model, to keep track if recomposition is due to :
-            // a - city api call
-            // b - location access
-            // c - refresh location
-            weatherViewModel.getCurrentWeatherByLatLong(savedLatLongState.lat!!.toFloat(), savedLatLongState.long!!.toFloat())
-        }
-        else {
-            weatherViewModel.requestLocationAccess()
-        }
-    }
     val currentWeatherState = weatherViewModel.currentWeatherState.value
     val todayHourlyForecastState = weatherViewModel.todayHourlyForecast.value
     val currentWeatherGraphState = weatherViewModel.currentWeatherGraph.value
+
+    Log.d("tagss", savedLatLongState.lat.toString() + savedLatLongState.long.toString())
+
+    LaunchedEffect(key1 = Unit) {
+        // Need to check if recomposition due to city search or current weather
+        // key1 = isCitySearch:Boolean (present in viewmodel)
+        weatherViewModel.getCurrentWeatherByLatLong(
+            savedLatLongState.lat!!.toFloat(),
+            savedLatLongState.long!!.toFloat()
+        )
+    }
 
     Column(
         Modifier
@@ -74,7 +71,10 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
             onSearchDisplayClosed = { },
             onSearchDisplayChanged = { }
         )
-        CurrentWeatherCard(currentWeather = currentWeatherState.data, placeHolderVisibility = currentWeatherState.isLoading)
+        CurrentWeatherCard(
+            currentWeather = currentWeatherState.data,
+            placeHolderVisibility = currentWeatherState.isLoading
+        )
         WeatherExtraDetailCard(placeHolderVisibility = currentWeatherState.isLoading)
         Spacer(modifier = Modifier.height(5.dp))
         Text(
@@ -98,10 +98,10 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
                 ),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(todayHourlyForecastState.data?: listOf()) { item ->
+            items(todayHourlyForecastState.data ?: listOf()) { item ->
                 HourlyForecastItem(
 //                    if (item.isCurrentWeather) R.drawable.waves else
-                    bgImage =  R.drawable.white_bg,
+                    bgImage = R.drawable.white_bg,
                     iconUrl = item.iconUrl!!,
                     temperature = item.temp.toString(),
                     time = item.timeString!!,

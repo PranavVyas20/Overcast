@@ -1,8 +1,15 @@
 package com.example.daggerhilttest.viewmodels
 
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.doublePreferencesKey
@@ -16,6 +23,7 @@ import com.example.daggerhilttest.repository.WeatherRepository
 import com.example.daggerhilttest.util.Resource
 import com.example.daggerhilttest.util.getMarker
 import com.example.daggerhilttest.util.marker
+import com.google.android.gms.location.LocationServices
 import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatryk.vico.core.entry.FloatEntry
 import com.patrykandpatryk.vico.core.marker.Marker
@@ -40,6 +48,10 @@ class WeatherViewModel @Inject constructor(
         val data: T? = null,
         val error: String = ""
     )
+
+//    val mFusedLocationClient = LocationServices.getFusedLocationProviderClient(LocalContext)
+//val locationManager: LocationManager =
+//    getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
     private val tempList: List<HourlyForecastLocal> = listOf(
         HourlyForecastLocal(0.0, "", ""),
@@ -80,11 +92,11 @@ class WeatherViewModel @Inject constructor(
         return (cel * 10.0).roundToInt() / 10.0
     }
 
-    suspend fun getLatLongFromDataStorePref() {
+    suspend fun getLatLongFromDataStorePref(): LatLong {
         val preferences = dataStorePref.data.first()
         val lat = preferences[PreferencesKeys.SAVED_LAT]
         val long = preferences[PreferencesKeys.SAVED_LONG]
-        _savedLatLongState.value = LatLong(lat, long)
+        return LatLong(lat,long)
     }
 
     suspend fun saveLatLongInDataStorePref(lat: Double, long: Double) {
@@ -92,7 +104,6 @@ class WeatherViewModel @Inject constructor(
             preferences[PreferencesKeys.SAVED_LAT] = lat
             preferences[PreferencesKeys.SAVED_LONG] = long
         }
-        _savedLatLongState.value = LatLong(lat, long)
     }
 
     private fun getDateFromUnix(unixTime: Long): String {
@@ -159,6 +170,7 @@ class WeatherViewModel @Inject constructor(
     suspend fun requestLocationAccess(){
         Log.d("tagss", "requesting location")
         // got location access and save it to data store pref
+
         saveLatLongInDataStorePref(1.1,2.3)
 //        _savedLatLongState.value = LatLong(1.1, 2.3)
     }
