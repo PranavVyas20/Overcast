@@ -49,10 +49,7 @@ class WeatherViewModel @Inject constructor(
         val error: String = ""
     )
 
-//    val mFusedLocationClient = LocationServices.getFusedLocationProviderClient(LocalContext)
-//val locationManager: LocationManager =
-//    getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
+    var test = 0
     private val tempList: List<HourlyForecastLocal> = listOf(
         HourlyForecastLocal(0.0, "", ""),
         HourlyForecastLocal(0.0, "", ""),
@@ -167,13 +164,6 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    suspend fun requestLocationAccess(){
-        Log.d("tagss", "requesting location")
-        // got location access and save it to data store pref
-
-        saveLatLongInDataStorePref(1.1,2.3)
-//        _savedLatLongState.value = LatLong(1.1, 2.3)
-    }
     suspend fun getCurrentWeatherByCity(city: String) {
         weatherRepository.getCurrentWeatherByCity(city).onEach { result ->
             when (result.status) {
@@ -194,6 +184,7 @@ class WeatherViewModel @Inject constructor(
     }
 
     suspend fun getCurrentWeatherByLatLong(lat: Float, long: Float) {
+        Log.d("apiCall","$lat $long")
         weatherRepository.getCurrentWeatherByLatLong(lat, long).onEach { result ->
             when (result.status) {
                 Constants.WeatherApiStatus.STATUS_LOADING -> {

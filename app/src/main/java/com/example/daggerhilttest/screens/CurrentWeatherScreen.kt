@@ -48,14 +48,11 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
     val todayHourlyForecastState = weatherViewModel.todayHourlyForecast.value
     val currentWeatherGraphState = weatherViewModel.currentWeatherGraph.value
 
-    Log.d("tagss", savedLatLongState.lat.toString() + savedLatLongState.long.toString())
-
     LaunchedEffect(key1 = Unit) {
-        // Need to check if recomposition due to city search or current weather
-        // key1 = isCitySearch:Boolean (present in viewmodel)
+        val savedLatLong = weatherViewModel.getLatLongFromDataStorePref()
         weatherViewModel.getCurrentWeatherByLatLong(
-            savedLatLongState.lat!!.toFloat(),
-            savedLatLongState.long!!.toFloat()
+            savedLatLong.lat!!.toFloat(),
+            savedLatLong.long!!.toFloat()
         )
     }
 

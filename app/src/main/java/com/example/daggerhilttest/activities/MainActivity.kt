@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color(0xFFF5F6F8)
                 ) {
+                    Log.d("vmTest",weatherViewModel.test.toString())
                     CurrentWeatherScreen(weatherViewModel)
                 }
             }

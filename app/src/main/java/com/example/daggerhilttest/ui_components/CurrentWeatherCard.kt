@@ -62,7 +62,6 @@ fun weatherCardDetails(
     time: String = "8:00 PM",
     temperature: String = "28",
     tempImage: Any? = null
-
 ) {
     Column(
         modifier = Modifier

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,6 +98,8 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?, visibility: B
                 startAxis = startAxis(),
                 bottomAxis = bottomAxis(valueFormatter = axisValueFormatter)
             )
+        } else {
+            Text(text = "Unable to fetch graph data")
         }
     }
 }

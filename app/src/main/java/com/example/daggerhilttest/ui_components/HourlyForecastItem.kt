@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.daggerhilttest.R
 import com.example.daggerhilttest.ui.theme.shimmerColor
@@ -61,9 +63,11 @@ fun HourlyForestDetails(
                 .align(alignment = Alignment.CenterHorizontally)
                 .padding(top = 25.dp)
         )
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = icon,
-            placeholder = painterResource(R.drawable.sunny),
+            loading = {
+                CircularProgressIndicator()
+            },
             contentDescription = ""
         )
         Text(

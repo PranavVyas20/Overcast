@@ -40,14 +40,12 @@ class LocationSplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_splash)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        weatherViewModel.test++
         lifecycleScope.launch {
             val savedLocation = weatherViewModel.getLatLongFromDataStorePref()
             if (savedLocation.lat == null && savedLocation.long == null) {
                 getLocation()
             } else {
-                weatherViewModel.saveLatLongInDataStorePref(
-                    savedLocation.lat!!, savedLocation.long!!
-                )
                 startWeatherActivity()
             }
         }
@@ -82,6 +80,7 @@ class LocationSplashActivity : AppCompatActivity() {
                                     weatherViewModel.saveLatLongInDataStorePref(
                                         locationItem[0].latitude, locationItem[0].longitude
                                     )
+                                    startWeatherActivity()
                                 }
                                 Log.d(
                                     "locUpdate",
@@ -92,7 +91,6 @@ class LocationSplashActivity : AppCompatActivity() {
                                     "location fetched",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                startWeatherActivity()
                             } else {
                                 Toast.makeText(
                                     this@LocationSplashActivity,
