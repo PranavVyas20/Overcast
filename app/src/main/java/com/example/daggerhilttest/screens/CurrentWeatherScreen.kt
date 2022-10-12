@@ -1,15 +1,11 @@
 package com.example.daggerhilttest.screens
 
-import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import com.example.daggerhilttest.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -19,31 +15,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import com.example.daggerhilttest.models.HourlyForecastLocal
-import com.example.daggerhilttest.models.HourlyForecastTest
 import com.example.daggerhilttest.ui.theme.shimmerColor
 import com.example.daggerhilttest.ui_components.*
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
-import com.google.android.gms.location.LocationServices
-import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
-import com.patrykandpatryk.vico.core.entry.FloatEntry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
-    val savedLatLongState = weatherViewModel.savedLatLong.value
     val currentWeatherState = weatherViewModel.currentWeatherState.value
     val todayHourlyForecastState = weatherViewModel.todayHourlyForecast.value
     val currentWeatherGraphState = weatherViewModel.currentWeatherGraph.value
@@ -64,15 +48,22 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         ExpandableSearchView(
+            locationName = if (currentWeatherState.data != null) currentWeatherState.data.cityName!! else "",
+            placeHolderVisibility = currentWeatherState.isLoading,
             "",
             onSearchDisplayClosed = { },
             onSearchDisplayChanged = { }
         )
         CurrentWeatherCard(
+            weatherViewModel = weatherViewModel,
             currentWeather = currentWeatherState.data,
             placeHolderVisibility = currentWeatherState.isLoading
         )
-        WeatherExtraDetailCard(placeHolderVisibility = currentWeatherState.isLoading)
+        WeatherExtraDetailCard(
+            weatherViewModel = weatherViewModel,
+            currentWeather = currentWeatherState.data,
+            placeHolderVisibility = currentWeatherState.isLoading
+        )
         Spacer(modifier = Modifier.height(5.dp))
         Text(
             text = "Hourly Forecast",
@@ -105,7 +96,10 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
                 )
             }
         }
-        CurrentWeatherGraph(currentWeatherGraphState.data, currentWeatherGraphState.isLoading)
+        CurrentWeatherGraph(
+            currentWeatherGraph = currentWeatherGraphState.data,
+            visibility = currentWeatherGraphState.isLoading
+        )
         BottomButtonLayout()
     }
 }

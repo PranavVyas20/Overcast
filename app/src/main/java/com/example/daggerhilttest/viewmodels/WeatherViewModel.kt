@@ -58,11 +58,12 @@ class WeatherViewModel @Inject constructor(
         HourlyForecastLocal(0.0, "", ""),
         HourlyForecastLocal(0.0, "", "")
     )
+
     private val _currentWeatherState = mutableStateOf<UIState<CurrentWeather>>(UIState())
     val currentWeatherState get() = _currentWeatherState
     
-    private val _savedLatLongState = mutableStateOf(LatLong())
-    val savedLatLong get() = _savedLatLongState
+//    private val _savedLatLongState = mutableStateOf(LatLong())
+//    val savedLatLong get() = _savedLatLongState
 
     private val _todayHourlyForecastState =
         mutableStateOf<UIState<List<HourlyForecastLocal>>>(UIState(data = tempList))
@@ -84,7 +85,7 @@ class WeatherViewModel @Inject constructor(
         )
     val currentWeatherGraph get() = _currentWeatherGraphDataState
 
-    private fun convertTempToCelcius(kTemp: Double): Double {
+     fun convertTempToCelcius(kTemp: Double): Double {
         val cel = kTemp - 273
         return (cel * 10.0).roundToInt() / 10.0
     }
@@ -103,13 +104,13 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    private fun getDateFromUnix(unixTime: Long): String {
+     fun getDateFromUnix(unixTime: Long): String {
         val sdf = SimpleDateFormat("MM-dd-yyyy")
-        val netDate = Date(("1664564638").toLong() * 1000)
+        val netDate = Date((unixTime) * 1000)
         return (sdf.format(netDate))
     }
 
-    private fun getTimeFromUnix(unixTime: Long): String {
+     fun getTimeFromUnix(unixTime: Long): String {
         val sdf = SimpleDateFormat("h.mm aa")
         val netDate = Date(unixTime * 1000)
         val dateInString = sdf.format(netDate)
@@ -117,7 +118,7 @@ class WeatherViewModel @Inject constructor(
         return dateInString
     }
 
-    private fun getTimeFromUnixHrs(unixTime: Long): String {
+     private fun getTimeFromUnixHrs(unixTime: Long): String {
         val sdf = SimpleDateFormat("HH.mm")
         val netDate = Date(unixTime * 1000)
         return sdf.format(netDate)

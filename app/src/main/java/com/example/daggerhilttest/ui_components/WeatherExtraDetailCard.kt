@@ -22,17 +22,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.daggerhilttest.models.CurrentWeather
 import com.example.daggerhilttest.ui.theme.shimmerColor
+import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 
-
 @Composable
 fun WeatherExtraDetailCard(
-    temperatureFeelsLike: String = "28 C",
-    humidity: String = "88 %",
-    airPreassure: String = "1009 hPa",
+    weatherViewModel: WeatherViewModel,
+    currentWeather: CurrentWeather?,
     placeHolderVisibility: Boolean
 ) {
     Card(
@@ -52,30 +52,32 @@ fun WeatherExtraDetailCard(
         elevation = 0.dp
     )
     {
-        Row(
-            modifier = Modifier
-                .padding(15.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            WeatherExtraDetailItem(
-                itemIcon = Icons.Outlined.Thermostat,
-                headingText = temperatureFeelsLike,
-                subHeadingText = "Feels Like"
-            )
-            WeatherExtraDetailItem(
-                itemIcon = Icons.Outlined.WaterDrop,
-                headingText = humidity,
-                subHeadingText = "Humidity"
-            )
-            WeatherExtraDetailItem(
-                itemIcon = Icons.Outlined.Speed,
-                headingText = airPreassure,
-                subHeadingText = "Air Preassure"
-            )
+        if(currentWeather!=null) {
+            Row(
+                modifier = Modifier
+                    .padding(15.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                WeatherExtraDetailItem(
+                    itemIcon = Icons.Outlined.Thermostat,
+                    headingText = weatherViewModel.convertTempToCelcius(currentWeather.mainTempData!!.feelsLike!!).toString(),
+                    subHeadingText = "Feels Like"
+                )
+                WeatherExtraDetailItem(
+                    itemIcon = Icons.Outlined.WaterDrop,
+                    headingText = currentWeather.mainTempData.humidity.toString(),
+                    subHeadingText = "Humidity"
+                )
+                WeatherExtraDetailItem(
+                    itemIcon = Icons.Outlined.Speed,
+                    headingText = currentWeather.mainTempData.pressure.toString(),
+                    subHeadingText = "Air Preassure"
+                )
+            }
+        } else {
+            Row(modifier = Modifier.height(100.dp)){}
         }
     }
-
-
 }
 
 @Composable

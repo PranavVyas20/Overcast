@@ -1,5 +1,6 @@
 package com.example.daggerhilttest.ui_components
 
+import android.widget.Space
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,13 +24,18 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.daggerhilttest.models.CurrentWeather
 import com.example.daggerhilttest.ui.theme.shimmerColor
+import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 
 @Composable
-fun CurrentWeatherCard(currentWeather: CurrentWeather?, placeHolderVisibility: Boolean) {
+fun CurrentWeatherCard(
+    weatherViewModel: WeatherViewModel,
+    currentWeather: CurrentWeather?,
+    placeHolderVisibility: Boolean
+) {
     Card(
         modifier = Modifier
             .wrapContentSize()
@@ -44,23 +50,39 @@ fun CurrentWeatherCard(currentWeather: CurrentWeather?, placeHolderVisibility: B
             ),
         shape = RoundedCornerShape(7)
     ) {
-        Box() {
+        Box {
             Image(
                 painter = painterResource(id = R.drawable.waves),
                 contentDescription = "",
                 modifier = Modifier.matchParentSize(),
                 contentScale = ContentScale.Crop
             )
-            weatherCardDetails()
+            if (currentWeather != null) {
+                val date = weatherViewModel.getDateFromUnix(currentWeather.unixTime!!)
+                val time = weatherViewModel.getTimeFromUnix(currentWeather.unixTime)
+                val temp =
+                    weatherViewModel.convertTempToCelcius(currentWeather.mainTempData!!.temp!!)
+                weatherCardDetails(
+                    date = date,
+                    time = time,
+                    temperature = temp.toInt().toString()
+                )
+            } else {
+                Row(
+                    modifier = Modifier
+                        .height(100.dp)
+                        .fillMaxWidth()
+                ) {}
+            }
         }
     }
 }
 
 @Composable
 fun weatherCardDetails(
-    date: String = "12 July 2022",
-    time: String = "8:00 PM",
-    temperature: String = "28",
+    date: String,
+    time: String,
+    temperature: String,
     tempImage: Any? = null
 ) {
     Column(

@@ -1,4 +1,5 @@
 package com.example.daggerhilttest.ui_components
+
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,15 +24,19 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.example.daggerhilttest.ui.theme.shimmerColor
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.placeholder
+import com.google.accompanist.placeholder.shimmer
 
 @Composable
 fun ExpandableSearchView(
+    locationName: String,
+    placeHolderVisibility: Boolean,
     searchDisplay: String,
     onSearchDisplayChanged: (String) -> Unit,
     onSearchDisplayClosed: () -> Unit,
-    modifier: Modifier = Modifier,
     expandedInitially: Boolean = false,
-    tint: Color = MaterialTheme.colors.onPrimary
 ) {
     val (expanded, onExpandedChanged) = remember {
         mutableStateOf(expandedInitially)
@@ -45,9 +50,9 @@ fun ExpandableSearchView(
                 onSearchDisplayClosed = onSearchDisplayClosed
             )
             false -> CollapsedSearchView(
+                locationName = locationName,
+                placeHolderVisibility = placeHolderVisibility,
                 onExpandedChanged = onExpandedChanged,
-                modifier = modifier,
-                tint = tint
             )
         }
     }
@@ -64,15 +69,23 @@ fun SearchIcon() {
 
 @Composable
 fun CollapsedSearchView(
-    locationName:String = "Banasthali",
+    placeHolderVisibility: Boolean,
+    locationName: String = "Banasthali",
     onExpandedChanged: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-    tint: Color = MaterialTheme.colors.onPrimary,
-) {
+
+    ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
+            .padding(vertical = 2.dp)
+            .placeholder(
+                visible = placeHolderVisibility,
+                color = shimmerColor,
+                shape = RoundedCornerShape(8.dp),
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = Color.White,
+                )
+            ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
