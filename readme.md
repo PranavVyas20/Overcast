@@ -18,8 +18,9 @@ SkyPeeker is an android app made with Jetpack compose and kotlin that show weath
 
 - [Preferences DataStore](https://developer.android.com/topic/libraries/architecture/datastore)
 
-### API Used
+### APIs Used
 * [OpenWeather](https://openweathermap.org/)
+* [Google Places](https://developers.google.com/maps/documentation/places/web-service/overview)
 
 ## Features:
 
@@ -30,3 +31,18 @@ SkyPeeker is an android app made with Jetpack compose and kotlin that show weath
 - 24 Hrs weather graph
 
 - Search Location for its weather details
+
+## Screenshots:
+
+<table>
+  <tr>
+     <td>Access user's location</td>
+     <td>Home Screen</td>
+     <td>Search for location</td>
+  </tr>
+  <tr>
+    <td><img src="ss/location.png" width=270 height=480></td>
+    <td><img src="ss/homescreen.png" width=270 height=480></td> 
+    <td><img src="ss/searchLocation.png" width=270 height=480></td>
+  </tr>
+ </table>
