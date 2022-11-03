@@ -1,4 +1,4 @@
-SkyPeeker is an android app made with Jetpack compose and kotlin that show weather status for your location
+WeatherBee is an android app made with Jetpack compose and kotlin that show weather status for your location
 
 ## Made with the use of Modern Android development tools:
 
