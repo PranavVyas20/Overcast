@@ -38,6 +38,7 @@ import com.patrykandpatryk.vico.compose.component.shape.shader.verticalGradient
 import com.patrykandpatryk.vico.core.axis.AxisPosition
 import com.patrykandpatryk.vico.core.axis.formatter.AxisValueFormatter
 import com.patrykandpatryk.vico.core.chart.line.LineChart
+import com.patrykandpatryk.vico.core.component.text.textComponent
 import com.patrykandpatryk.vico.core.entry.ChartEntryModel
 import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatryk.vico.core.entry.FloatEntry
@@ -49,6 +50,9 @@ import kotlin.random.Random.Default.nextFloat
 
 
 private var axisValueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { _, _ -> "" }
+private val yAxisValueFormatter = AxisValueFormatter<AxisPosition.Vertical.Start> { i, j ->
+    "${i.toInt()}℃"
+}
 
 @RequiresApi(Build.VERSION_CODES.N)
 @Composable
@@ -58,7 +62,7 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?, visibility: B
         currentWeatherGraph.timeStampMap!!.forEach { (key, _) ->
             currentWeatherGraph.markerMap!![key] = marker()
         }
-        axisValueFormatter = AxisValueFormatter { i, j ->
+        axisValueFormatter = AxisValueFormatter { i, _ ->
             currentWeatherGraph.timeStampMap[i].toString()
         }
     }
@@ -75,12 +79,13 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?, visibility: B
                 )
             )
     ) {
-        if(currentWeatherGraph != null) {
+        if (currentWeatherGraph != null) {
             Chart(
                 chart = lineChart(
                     lines = listOf(
                         lineSpec(
-                            lineColor = graphLineColor, lineBackgroundShader = verticalGradient(
+                            lineColor = graphLineColor,
+                            lineBackgroundShader = verticalGradient(
                                 arrayOf(
                                     graphLineBottomColor.copy(alpha = 0.5f),
                                     graphLineBottomColor.copy(alpha = 0.5f)
@@ -95,7 +100,7 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?, visibility: B
                 modifier = Modifier
                     .wrapContentSize()
                     .background(Color.White),
-                startAxis = startAxis(),
+                startAxis = startAxis(valueFormatter = yAxisValueFormatter),
                 bottomAxis = bottomAxis(valueFormatter = axisValueFormatter)
             )
         } else {
