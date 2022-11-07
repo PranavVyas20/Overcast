@@ -8,6 +8,7 @@ import com.example.daggerhilttest.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.example.daggerhilttest.constants.Constants
 import com.example.daggerhilttest.models.CurrentWeather
 import com.example.daggerhilttest.ui.theme.shimmerColor
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
@@ -39,7 +43,7 @@ fun CurrentWeatherCard(
     Card(
         modifier = Modifier
             .wrapContentSize()
-            .padding(10.dp)
+            .padding(start = 10.dp, bottom = 10.dp, end = 10.dp)
             .placeholder(
                 visible = placeHolderVisibility,
                 color = shimmerColor,
@@ -47,8 +51,7 @@ fun CurrentWeatherCard(
                 highlight = PlaceholderHighlight.shimmer(
                     highlightColor = Color.White,
                 )
-            ),
-        shape = RoundedCornerShape(7)
+            ), shape = RoundedCornerShape(7)
     ) {
         Box {
             Image(
@@ -61,11 +64,14 @@ fun CurrentWeatherCard(
                 val date = weatherViewModel.getDateFromUnix(currentWeather.unixTime!!)
                 val time = weatherViewModel.getTimeFromUnix(currentWeather.unixTime)
                 val temp =
-                    weatherViewModel.convertTempToCelcius(currentWeather.mainTempData!!.temp!!)
-                weatherCardDetails(
+                    weatherViewModel.convertTempToCelsius(currentWeather.mainTempData!!.temp!!)
+                val iconId = currentWeather.weatherList!![0].icon
+                val iconUrl = Constants.BASE_ICON_URL + iconId + Constants.ICON_URL_SUFFIX
+                WeatherCardDetails(
                     date = date,
                     time = time,
-                    temperature = temp.toInt().toString()
+                    temperature = temp.toString(),
+                    tempIconImageUrl = iconUrl
                 )
             } else {
                 Row(
@@ -79,11 +85,8 @@ fun CurrentWeatherCard(
 }
 
 @Composable
-fun weatherCardDetails(
-    date: String,
-    time: String,
-    temperature: String,
-    tempImage: Any? = null
+fun WeatherCardDetails(
+    date: String, time: String, temperature: String, tempIconImageUrl: String
 ) {
     Column(
         modifier = Modifier
@@ -101,17 +104,14 @@ fun weatherCardDetails(
                 .padding(
                     start = 10.dp,
                     bottom = 10.dp,
-                    end = 10.dp
                 ),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Image(
-                modifier = Modifier
-                    .padding(start = 30.dp, end = 50.dp)
-                    .align(Alignment.CenterVertically)
-                    .scale(3f),
-                painter = rememberAsyncImagePainter(model = "https://openweathermap.org/img/wn/10d@4x.png"),
-                contentDescription = "",
+            SubcomposeAsyncImage(
+                modifier = Modifier.scale(2.3f), model = tempIconImageUrl, loading = {
+                    CircularProgressIndicator()
+                }, contentDescription = ""
             )
             Text(
                 text = "$temperature\u2103",

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import retrofit2.Response
 
-class WeatherRepository(private val weatherApi: WeatherApi) {
+class WeatherRepository (private val weatherApi: WeatherApi) {
      suspend fun getCurrentWeatherByCity(city: String): Flow<Resource<CurrentWeather>> {
          return flow{
              emit(Resource(Constants.WeatherApiStatus.STATUS_LOADING))
@@ -34,9 +34,10 @@ class WeatherRepository(private val weatherApi: WeatherApi) {
          }
      }
 
-    suspend fun getCurrentWeatherByLatLong(lat: Float, long: Float): Flow<Resource<CurrentWeather>> {
+    suspend fun getCurrentWeatherByLatLong(lat: Double, long: Double): Flow<Resource<CurrentWeather>> {
         return flow{
             emit(Resource(Constants.WeatherApiStatus.STATUS_LOADING))
+            delay(2000)
             try {
                 val response = weatherApi.getCurrentWeatherByLatLong(lat, long, Constants.WEATHER_API_KEY)
                 Log.d("responseWeather", response.toString())
@@ -73,7 +74,7 @@ class WeatherRepository(private val weatherApi: WeatherApi) {
         }
     }
 
-    suspend fun getHourlyForecastByLatLong(lat: Float, long: Float): Flow<Resource<HourlyForecast>> {
+    suspend fun getHourlyForecastByLatLong(lat: Double, long: Double): Flow<Resource<HourlyForecast>> {
         return flow {
             emit(Resource(Constants.WeatherApiStatus.STATUS_LOADING))
             val response = weatherApi.getHourlyForecastByLatLong(lat, long, Constants.WEATHER_API_KEY)

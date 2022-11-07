@@ -60,17 +60,17 @@ fun WeatherExtraDetailCard(
             ) {
                 WeatherExtraDetailItem(
                     itemIcon = Icons.Outlined.Thermostat,
-                    headingText = weatherViewModel.convertTempToCelcius(currentWeather.mainTempData!!.feelsLike!!).toString(),
+                    headingText = "${weatherViewModel.convertTempToCelsius(currentWeather.mainTempData!!.feelsLike!!)} ℃",
                     subHeadingText = "Feels Like"
                 )
                 WeatherExtraDetailItem(
                     itemIcon = Icons.Outlined.WaterDrop,
-                    headingText = currentWeather.mainTempData.humidity.toString(),
+                    headingText = "${currentWeather.mainTempData.humidity} %",
                     subHeadingText = "Humidity"
                 )
                 WeatherExtraDetailItem(
                     itemIcon = Icons.Outlined.Speed,
-                    headingText = currentWeather.mainTempData.pressure.toString(),
+                    headingText = "${currentWeather.mainTempData.pressure} hPa",
                     subHeadingText = "Air Preassure"
                 )
             }

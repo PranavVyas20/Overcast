@@ -3,9 +3,18 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'dagger.hilt.android.plugin'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
+    signingConfigs {
+        release {
+            storeFile file(compose_ui_version)
+            storePassword 'weatherb'
+            keyAlias 'weatherb'
+            keyPassword 'weatherb'
+        }
+    }
     namespace 'com.example.daggerhilttest'
     compileSdk 33
 
@@ -91,14 +100,24 @@ dependencies {
     implementation "com.patrykandpatryk.vico:compose-m3:1.4.3"
 
     // Material 3
-    implementation("androidx.compose.material3:material3:1.0.0-beta03")
-    implementation("androidx.compose.material3:material3-window-size-class:1.0.0-beta03")
+    implementation("androidx.compose.material3:material3:1.1.0-alpha01")
+    implementation("androidx.compose.material3:material3-window-size-class:1.1.0-alpha01")
 
     // Preferences Datastore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
     // Google gms service for location access
-    implementation 'com.google.android.gms:play-services-location:20.0.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.0'
+
+    // Places api
+    implementation 'com.google.android.libraries.places:places:2.6.0'
+
+    // Custom simple toast
+    implementation 'com.shamanland:xdroid-toaster:0.0.10'
+
+
+
+
 
 
 

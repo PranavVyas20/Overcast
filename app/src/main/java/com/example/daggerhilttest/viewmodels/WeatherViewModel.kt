@@ -1,18 +1,11 @@
 package com.example.daggerhilttest.viewmodels
 
-import android.content.Context
-import android.content.pm.PackageManager
-import android.location.Location
-import android.location.LocationManager
+
 import android.util.Log
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,18 +13,22 @@ import com.example.daggerhilttest.PreferencesKeys
 import com.example.daggerhilttest.constants.Constants
 import com.example.daggerhilttest.models.*
 import com.example.daggerhilttest.repository.WeatherRepository
-import com.example.daggerhilttest.util.Resource
-import com.example.daggerhilttest.util.getMarker
-import com.example.daggerhilttest.util.marker
-import com.google.android.gms.location.LocationServices
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.net.*
 import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatryk.vico.core.entry.FloatEntry
 import com.patrykandpatryk.vico.core.marker.Marker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import xdroid.toaster.Toaster.toast
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -40,16 +37,14 @@ import kotlin.math.roundToInt
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val weatherRepository: WeatherRepository,
-    private val dataStorePref: DataStore<Preferences>
+    private val dataStorePref: DataStore<Preferences>,
+    private val placesClient: PlacesClient
 ) : ViewModel() {
 
     data class UIState<T : Any>(
-        val isLoading: Boolean = true,
-        val data: T? = null,
-        val error: String = ""
+        val isLoading: Boolean = true, val data: T? = null, val error: String = ""
     )
 
-    var test = 0
     private val tempList: List<HourlyForecastLocal> = listOf(
         HourlyForecastLocal(0.0, "", ""),
         HourlyForecastLocal(0.0, "", ""),
@@ -61,9 +56,6 @@ class WeatherViewModel @Inject constructor(
 
     private val _currentWeatherState = mutableStateOf<UIState<CurrentWeather>>(UIState())
     val currentWeatherState get() = _currentWeatherState
-    
-//    private val _savedLatLongState = mutableStateOf(LatLong())
-//    val savedLatLong get() = _savedLatLongState
 
     private val _todayHourlyForecastState =
         mutableStateOf<UIState<List<HourlyForecastLocal>>>(UIState(data = tempList))
@@ -73,20 +65,65 @@ class WeatherViewModel @Inject constructor(
     private var timeStampMap: MutableMap<Float, String> = mutableMapOf()
     private val markerMap: MutableMap<Float, Marker> = mutableMapOf()
 
-    private val _currentWeatherGraphDataState =
-        mutableStateOf<UIState<CurrentWeatherGraph>>(
-            UIState(
-                data = CurrentWeatherGraph(
-                    producer,
-                    timeStampMap,
-                    markerMap
-                )
+    private val _currentWeatherGraphDataState = mutableStateOf<UIState<CurrentWeatherGraph>>(
+        UIState(
+            data = CurrentWeatherGraph(
+                producer, timeStampMap, markerMap
             )
         )
+    )
     val currentWeatherGraph get() = _currentWeatherGraphDataState
+    val placeSuggestions = mutableStateListOf<PlaceSuggestion>()
 
-     fun convertTempToCelcius(kTemp: Double): Double {
-        val cel = kTemp - 273
+    fun getLatLongByPlaceId(placeId: String) {
+        val placeFields = listOf(Place.Field.LAT_LNG)
+
+        // Construct a request object, passing the place ID and fields array.
+        val request = FetchPlaceRequest.newInstance(placeId, placeFields)
+
+        placesClient.fetchPlace(request).addOnSuccessListener { response: FetchPlaceResponse ->
+            val place = response.place
+            Log.i("fetchPlaceTagg", "Place found: $place")
+            if (place.latLng != null) {
+                placeSuggestions.clear()
+                CoroutineScope(Dispatchers.IO).launch {
+                    delay(150)
+                    getCurrentWeatherByLatLong(place.latLng.latitude, place.latLng.longitude)
+                }
+            }
+        }.addOnFailureListener { exception: Exception ->
+            Log.d("fetchPlaceTagg", exception.toString())
+        }
+    }
+
+    fun tryAutoComplete(query: String) {
+        CoroutineScope(Dispatchers.Default).launch {
+            val token = AutocompleteSessionToken.newInstance()
+            val request =
+                FindAutocompletePredictionsRequest.builder().setSessionToken(token).setQuery(query)
+                    .build()
+            placesClient.findAutocompletePredictions(request)
+                .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                    // Remove all elements
+                    placeSuggestions.clear()
+                    for (prediction in response.autocompletePredictions) {
+                        Log.i("autocompleteTagg", prediction.getPrimaryText(null).toString())
+                        Log.i("autocompleteTagg", prediction.placeId.toString())
+
+                        placeSuggestions.add(
+                            PlaceSuggestion(
+                                prediction.getPrimaryText(null).toString(), prediction.placeId
+                            )
+                        )
+                    }
+                }.addOnFailureListener { exception: Exception? ->
+                    Log.d("autocompleteTagg", exception.toString())
+                }
+        }
+    }
+
+    fun convertTempToCelsius(kTemp: Double): Double {
+        val cel = kTemp - 273.15
         return (cel * 10.0).roundToInt() / 10.0
     }
 
@@ -94,7 +131,7 @@ class WeatherViewModel @Inject constructor(
         val preferences = dataStorePref.data.first()
         val lat = preferences[PreferencesKeys.SAVED_LAT]
         val long = preferences[PreferencesKeys.SAVED_LONG]
-        return LatLong(lat,long)
+        return LatLong(lat, long)
     }
 
     suspend fun saveLatLongInDataStorePref(lat: Double, long: Double) {
@@ -104,13 +141,13 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-     fun getDateFromUnix(unixTime: Long): String {
+    fun getDateFromUnix(unixTime: Long): String {
         val sdf = SimpleDateFormat("MM-dd-yyyy")
         val netDate = Date((unixTime) * 1000)
         return (sdf.format(netDate))
     }
 
-     fun getTimeFromUnix(unixTime: Long): String {
+    fun getTimeFromUnix(unixTime: Long): String {
         val sdf = SimpleDateFormat("h.mm aa")
         val netDate = Date(unixTime * 1000)
         val dateInString = sdf.format(netDate)
@@ -118,7 +155,7 @@ class WeatherViewModel @Inject constructor(
         return dateInString
     }
 
-     private fun getTimeFromUnixHrs(unixTime: Long): String {
+    private fun getTimeFromUnixHrs(unixTime: Long): String {
         val sdf = SimpleDateFormat("HH.mm")
         val netDate = Date(unixTime * 1000)
         return sdf.format(netDate)
@@ -135,7 +172,7 @@ class WeatherViewModel @Inject constructor(
             val currentWeatherItem = forecastList[i]
 
             val hourlyForecastItem = HourlyForecastLocal(
-                temp = convertTempToCelcius(currentWeatherItem.mainTempData!!.temp!!),
+                temp = convertTempToCelsius(currentWeatherItem.mainTempData!!.temp!!),
                 iconUrl = "${Constants.BASE_ICON_URL}${
                     currentWeatherItem.weatherList?.get(
                         0
@@ -154,18 +191,16 @@ class WeatherViewModel @Inject constructor(
 
             prevTime = xCoordinate.toInt().toFloat()
             val hourlyForecastGraphItem = FloatEntry(
-                x = xCoordinate.toInt().toFloat(),
-                y = hourlyForecastItem.temp!!.toFloat()
+                x = xCoordinate.toInt().toFloat(), y = hourlyForecastItem.temp!!.toFloat()
             )
             // 2f pe map hai 2.3f
-            timeStampMap[hourlyForecastGraphItem.x] =
-                hourlyForecastItem.timeString.toString()
+            timeStampMap[hourlyForecastGraphItem.x] = hourlyForecastItem.timeString.toString()
 
             hourlyForecastGraphPoints.add(hourlyForecastGraphItem)
         }
     }
 
-    suspend fun getCurrentWeatherByCity(city: String) {
+/*    suspend fun getCurrentWeatherByCity(city: String) {
         weatherRepository.getCurrentWeatherByCity(city).onEach { result ->
             when (result.status) {
                 Constants.WeatherApiStatus.STATUS_LOADING -> {
@@ -182,13 +217,24 @@ class WeatherViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
-    }
+    }*/
 
-    suspend fun getCurrentWeatherByLatLong(lat: Float, long: Float) {
-        Log.d("apiCall","$lat $long")
+    suspend fun getCurrentWeatherByLatLong(lat: Double, long: Double) {
+        Log.d("apiCall", "$lat $long")
         weatherRepository.getCurrentWeatherByLatLong(lat, long).onEach { result ->
             when (result.status) {
                 Constants.WeatherApiStatus.STATUS_LOADING -> {
+                    // Check if calling this fun when searching a location
+                    if (_currentWeatherState.value.data != null) {
+                        _todayHourlyForecastState.value =
+                            (UIState(isLoading = true, data = tempList))
+                        _currentWeatherGraphDataState.value = UIState(
+                            true, data = CurrentWeatherGraph(
+                                producer, timeStampMap, markerMap
+                            )
+                        )
+                    }
+                    // till here
                     _currentWeatherState.value = UIState(isLoading = true)
                 }
                 Constants.WeatherApiStatus.STATUS_SUCCESS -> {
@@ -204,7 +250,7 @@ class WeatherViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
-    private suspend fun getTodayWeatherForecastByCity(city: String) {
+/*    private suspend fun getTodayWeatherForecastByCity(city: String) {
         weatherRepository.getHourlyForecastByCity(city).onEach { result ->
 
             when (result.status) {
@@ -220,9 +266,7 @@ class WeatherViewModel @Inject constructor(
                     val hourlyForecastGraphPoints = mutableListOf<FloatEntry>()
 
                     handleGraphPointsCreation(
-                        result.data!!.forecastList!!,
-                        hourlyForecast,
-                        hourlyForecastGraphPoints
+                        result.data!!.forecastList!!, hourlyForecast, hourlyForecastGraphPoints
                     )
 
                     Log.d("weatherMap", timeStampMap.toString())
@@ -239,16 +283,14 @@ class WeatherViewModel @Inject constructor(
                 Constants.WeatherApiStatus.STATUS_ERROR -> {
                     Log.d("weatherForecastStatus", result.errorMessage.toString())
                     _todayHourlyForecastState.value = UIState(
-                        isLoading = false,
-                        data = null,
-                        error = result.errorMessage.toString()
+                        isLoading = false, data = null, error = result.errorMessage.toString()
                     )
                 }
             }
         }.launchIn(viewModelScope)
-    }
+    }*/
 
-    private suspend fun getTodayWeatherForecastByLatLong(lat: Float, long: Float) {
+    private suspend fun getTodayWeatherForecastByLatLong(lat: Double, long: Double) {
         weatherRepository.getHourlyForecastByLatLong(lat, long).onEach { result ->
 
             when (result.status) {
@@ -264,9 +306,7 @@ class WeatherViewModel @Inject constructor(
                     val hourlyForecastGraphPoints = mutableListOf<FloatEntry>()
 
                     handleGraphPointsCreation(
-                        result.data!!.forecastList!!,
-                        hourlyForecast,
-                        hourlyForecastGraphPoints
+                        result.data!!.forecastList!!, hourlyForecast, hourlyForecastGraphPoints
                     )
 
                     Log.d("weatherMap", timeStampMap.toString())
@@ -283,9 +323,7 @@ class WeatherViewModel @Inject constructor(
                 Constants.WeatherApiStatus.STATUS_ERROR -> {
                     Log.d("weatherForecastStatus", result.errorMessage.toString())
                     _todayHourlyForecastState.value = UIState(
-                        isLoading = false,
-                        data = null,
-                        error = result.errorMessage.toString()
+                        isLoading = false, data = null, error = result.errorMessage.toString()
                     )
                 }
             }

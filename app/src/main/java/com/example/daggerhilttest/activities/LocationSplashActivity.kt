@@ -40,7 +40,6 @@ class LocationSplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_splash)
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        weatherViewModel.test++
         lifecycleScope.launch {
             val savedLocation = weatherViewModel.getLatLongFromDataStorePref()
             if (savedLocation.lat == null && savedLocation.long == null) {
