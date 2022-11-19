@@ -37,7 +37,6 @@ class WeatherRepository (private val weatherApi: WeatherApi) {
     suspend fun getCurrentWeatherByLatLong(lat: Double, long: Double): Flow<Resource<CurrentWeather>> {
         return flow{
             emit(Resource(Constants.WeatherApiStatus.STATUS_LOADING))
-            delay(2000)
             try {
                 val response = weatherApi.getCurrentWeatherByLatLong(lat, long, Constants.WEATHER_API_KEY)
                 Log.d("responseWeather", response.toString())
