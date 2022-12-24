@@ -1,6 +1,7 @@
 package com.example.daggerhilttest.screens
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.daggerhilttest.R
 import com.example.daggerhilttest.models.LatLong
 import com.example.daggerhilttest.ui.theme.shimmerColor
@@ -27,6 +29,7 @@ import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
+import kotlinx.coroutines.async
 
 lateinit var savedLatLong: LatLong
 
@@ -39,7 +42,11 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
     val showLocationSuggestionsView = remember { mutableStateOf(true) }
 
     LaunchedEffect(key1 = Unit) {
-        savedLatLong = weatherViewModel.getLatLongFromDataStorePref()
+        val savedLatLongDeferred = async {
+            weatherViewModel.getLatLongFromDataStorePref()
+        }.await()
+        savedLatLong = savedLatLongDeferred!!
+        weatherViewModel.currentLocationLatLong = savedLatLong
         weatherViewModel.getCurrentWeatherByLatLong(
             savedLatLong.lat!!.toDouble(),
             savedLatLong.long!!.toDouble()

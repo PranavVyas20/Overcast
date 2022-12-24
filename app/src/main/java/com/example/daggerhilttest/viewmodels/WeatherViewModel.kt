@@ -13,7 +13,6 @@ import com.example.daggerhilttest.PreferencesKeys
 import com.example.daggerhilttest.constants.Constants
 import com.example.daggerhilttest.models.*
 import com.example.daggerhilttest.repository.WeatherRepository
-import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.*
@@ -21,14 +20,10 @@ import com.patrykandpatryk.vico.core.entry.ChartEntryModelProducer
 import com.patrykandpatryk.vico.core.entry.FloatEntry
 import com.patrykandpatryk.vico.core.marker.Marker
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import xdroid.toaster.Toaster.toast
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -44,6 +39,8 @@ class WeatherViewModel @Inject constructor(
     data class UIState<T : Any>(
         val isLoading: Boolean = true, val data: T? = null, val error: String = ""
     )
+
+    var currentLocationLatLong: LatLong? = null
 
     private val tempList: List<HourlyForecastLocal> = listOf(
         HourlyForecastLocal(0.0, "", ""),
@@ -127,17 +124,24 @@ class WeatherViewModel @Inject constructor(
         return (cel * 10.0).roundToInt() / 10.0
     }
 
-    suspend fun getLatLongFromDataStorePref(): LatLong {
-        val preferences = dataStorePref.data.first()
-        val lat = preferences[PreferencesKeys.SAVED_LAT]
-        val long = preferences[PreferencesKeys.SAVED_LONG]
-        return LatLong(lat, long)
+     suspend fun getLatLongFromDataStorePref(): LatLong? {
+        val savedLat = dataStorePref.data.first()[PreferencesKeys.SAVED_LAT]
+        val savedLong = dataStorePref.data.first()[PreferencesKeys.SAVED_LONG]
+        return if (savedLat == null && savedLong == null) {
+            null
+        } else {
+            LatLong(savedLat, savedLong)
+        }
     }
 
-    suspend fun saveLatLongInDataStorePref(lat: Double, long: Double) {
-        dataStorePref.edit { preferences ->
-            preferences[PreferencesKeys.SAVED_LAT] = lat
-            preferences[PreferencesKeys.SAVED_LONG] = long
+    fun saveLatLongInDataStorePref(lat: Double, long: Double) {
+        CoroutineScope(Dispatchers.IO).launch {
+            viewModelScope.async {
+                dataStorePref.edit { preferences ->
+                    preferences[PreferencesKeys.SAVED_LAT] = lat
+                    preferences[PreferencesKeys.SAVED_LONG] = long
+                }
+            }.await()
         }
     }
 
@@ -200,25 +204,6 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-/*    suspend fun getCurrentWeatherByCity(city: String) {
-        weatherRepository.getCurrentWeatherByCity(city).onEach { result ->
-            when (result.status) {
-                Constants.WeatherApiStatus.STATUS_LOADING -> {
-                    _currentWeatherState.value = UIState(isLoading = true)
-                }
-                Constants.WeatherApiStatus.STATUS_SUCCESS -> {
-                    _currentWeatherState.value = UIState(isLoading = false, data = result.data)
-                    getTodayWeatherForecastByCity(city)
-                }
-                Constants.WeatherApiStatus.STATUS_ERROR -> {
-                    Log.d("currentWeatherStatus", result.errorMessage.toString())
-                    _currentWeatherState.value =
-                        UIState(isLoading = false, error = result.errorMessage.toString())
-                }
-            }
-        }.launchIn(viewModelScope)
-    }*/
-
     suspend fun getCurrentWeatherByLatLong(lat: Double, long: Double) {
         Log.d("apiCall", "$lat $long")
         weatherRepository.getCurrentWeatherByLatLong(lat, long).onEach { result ->
@@ -249,46 +234,6 @@ class WeatherViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
     }
-
-/*    private suspend fun getTodayWeatherForecastByCity(city: String) {
-        weatherRepository.getHourlyForecastByCity(city).onEach { result ->
-
-            when (result.status) {
-                Constants.WeatherApiStatus.STATUS_LOADING -> {
-                    _todayHourlyForecastState.value = UIState(data = tempList, isLoading = true)
-
-                    producer.setEntries(listOf<FloatEntry>())
-                    _currentWeatherGraphDataState.value =
-                        UIState(data = CurrentWeatherGraph(producer, timeStampMap, markerMap))
-                }
-                Constants.WeatherApiStatus.STATUS_SUCCESS -> {
-                    val hourlyForecast = mutableListOf<HourlyForecastLocal>()
-                    val hourlyForecastGraphPoints = mutableListOf<FloatEntry>()
-
-                    handleGraphPointsCreation(
-                        result.data!!.forecastList!!, hourlyForecast, hourlyForecastGraphPoints
-                    )
-
-                    Log.d("weatherMap", timeStampMap.toString())
-
-                    _todayHourlyForecastState.value =
-                        UIState(isLoading = false, data = hourlyForecast)
-                    producer.setEntries(hourlyForecastGraphPoints)
-
-                    _currentWeatherGraphDataState.value = UIState(
-                        isLoading = false,
-                        data = CurrentWeatherGraph(producer, timeStampMap, markerMap)
-                    )
-                }
-                Constants.WeatherApiStatus.STATUS_ERROR -> {
-                    Log.d("weatherForecastStatus", result.errorMessage.toString())
-                    _todayHourlyForecastState.value = UIState(
-                        isLoading = false, data = null, error = result.errorMessage.toString()
-                    )
-                }
-            }
-        }.launchIn(viewModelScope)
-    }*/
 
     private suspend fun getTodayWeatherForecastByLatLong(lat: Double, long: Double) {
         weatherRepository.getHourlyForecastByLatLong(lat, long).onEach { result ->
