@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     color = Color(0xFFF5F6F8)
                 ) {
                     val savedLatLog = LatLong(savedLat, savedLong)
-                    CurrentWeatherScreen(weatherViewModel = weatherViewModel, savedLatLog)
+                    CurrentWeatherScreen(weatherViewModel = weatherViewModel)
                 }
             }
         }

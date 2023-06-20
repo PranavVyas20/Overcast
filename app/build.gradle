@@ -25,6 +25,7 @@ android {
         versionCode 1
         versionName "1.0"
 
+        buildConfigField("String", "MAPS_API_KEY", MAPS_API_KEY)
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -116,6 +117,9 @@ dependencies {
 
     // Custom simple toast
     implementation 'com.shamanland:xdroid-toaster:0.0.10'
+
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
+
 
 
 
