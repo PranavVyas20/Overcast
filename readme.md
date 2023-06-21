@@ -46,3 +46,13 @@ WeatherBee is an android app made with Jetpack compose and kotlin that show weat
     <td><img src="ss/searchLocation.png" width=270 height=480></td>
   </tr>
  </table>
+
+- TODO'S
+- [] Fonts
+- [] Replace older UI with new one
+- [] Create new search bar and suggestion box
+- [] Background api call
+- [] Create notification 
+- [] Create a side bar  that contains:
+  - [] Primary Color picker
+  - [] Notification duration
