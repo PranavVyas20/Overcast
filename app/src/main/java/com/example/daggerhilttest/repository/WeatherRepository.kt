@@ -14,25 +14,6 @@ import retrofit2.HttpException
 import retrofit2.Response
 
 class WeatherRepository (private val weatherApi: WeatherApi) {
-     suspend fun getCurrentWeatherByCity(city: String): Flow<Resource<CurrentWeather>> {
-         return flow{
-             emit(Resource(Constants.WeatherApiStatus.STATUS_LOADING))
-             try {
-                 val response = weatherApi.getCurrentWeatherByCity(city,Constants.WEATHER_API_KEY)
-                 Log.d("responseWeather", response.toString())
-                 if(response.code() == 200) {
-                     val currentWeatherData = response.body()
-                     emit(Resource(Constants.WeatherApiStatus.STATUS_SUCCESS,currentWeatherData))
-                 } else {
-                     emit(Resource(Constants.WeatherApiStatus.STATUS_ERROR,null,response.message()))
-                 }
-             }catch (e:Exception) {
-                 // Network error (no internet or some other shit)
-                 val errorMessage = "Network error: ${e.message}"
-                 emit(Resource(Constants.WeatherApiStatus.STATUS_ERROR, null, errorMessage))
-             }
-         }
-     }
 
     suspend fun getCurrentWeatherByLatLong(lat: Double, long: Double): Flow<Resource<CurrentWeather>> {
         return flow{
@@ -43,25 +24,6 @@ class WeatherRepository (private val weatherApi: WeatherApi) {
                 if(response.code() == 200) {
                     val currentWeatherData = response.body()
                     emit(Resource(Constants.WeatherApiStatus.STATUS_SUCCESS,currentWeatherData))
-                } else {
-                    emit(Resource(Constants.WeatherApiStatus.STATUS_ERROR,null,response.message()))
-                }
-            }catch (e:Exception) {
-                // Network error (no internet or some other shit)
-                val errorMessage = "Network error: ${e.message}"
-                emit(Resource(Constants.WeatherApiStatus.STATUS_ERROR, null, errorMessage))
-            }
-        }
-    }
-
-    suspend fun getHourlyForecastByCity(city: String): Flow<Resource<HourlyForecast>> {
-        return flow {
-            emit(Resource(Constants.WeatherApiStatus.STATUS_LOADING))
-            val response = weatherApi.getHourlyForecastByCity(city,Constants.WEATHER_API_KEY)
-            try {
-                if(response.code() == 200) {
-                    val hourlyForecastData = response.body()
-                    emit(Resource(Constants.WeatherApiStatus.STATUS_SUCCESS,hourlyForecastData))
                 } else {
                     emit(Resource(Constants.WeatherApiStatus.STATUS_ERROR,null,response.message()))
                 }
