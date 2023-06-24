@@ -100,8 +100,16 @@ fun CurrentWeatherGraph(currentWeatherGraph: CurrentWeatherGraph?, visibility: B
                 modifier = Modifier
                     .wrapContentSize()
                     .background(Color.White),
-                startAxis = startAxis(valueFormatter = yAxisValueFormatter),
-                bottomAxis = bottomAxis(valueFormatter = axisValueFormatter)
+                startAxis = startAxis(
+                    valueFormatter = yAxisValueFormatter,
+                    guideline = null,
+                    tick = null
+                ),
+                bottomAxis = bottomAxis(
+                    valueFormatter = axisValueFormatter,
+                    guideline = null,
+                    tick = null
+                )
             )
         } else {
             Text(text = "Unable to fetch graph data")

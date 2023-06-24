@@ -194,20 +194,20 @@ fun WeatherDetailItem() {
     }
 }
 
-@Composable
-fun HourlyForecastItem() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(tint = Color.DarkGray, imageVector = Icons.Default.Cloud, contentDescription = "icon")
-        Text(
-            text = "26°",
-            color = blackFontColor,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(text = "4 pm", fontSize = 18.sp, color = grayFontColor)
-
-    }
-}
+//@Composable
+//fun HourlyForecastItem() {
+//    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//        Icon(tint = Color.DarkGray, imageVector = Icons.Default.Cloud, contentDescription = "icon")
+//        Text(
+//            text = "26°",
+//            color = blackFontColor,
+//            fontSize = 22.sp,
+//            fontWeight = FontWeight.SemiBold
+//        )
+//        Text(text = "4 pm", fontSize = 18.sp, color = grayFontColor)
+//
+//    }
+//}
 
 @Composable
 fun HourlyForecastItemsRow(modifier: Modifier) {
@@ -216,7 +216,7 @@ fun HourlyForecastItemsRow(modifier: Modifier) {
         horizontalArrangement = Arrangement.spacedBy(28.dp)
     ) {
         items(7) {
-            HourlyForecastItem()
+//            HourlyForecastItem()
         }
     }
 }

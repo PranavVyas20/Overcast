@@ -1,5 +1,6 @@
 package com.example.daggerhilttest.screens
 
+import android.text.style.ParagraphStyle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +21,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PanoramaFishEye
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.material.icons.filled.Thermostat
@@ -30,11 +33,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.widget.Guideline
+import com.example.daggerhilttest.R
+
+val primaryColorPink = Color(0xFFFF64D4)
+val primaryColorBlue = Color(0xFF42C6FF)
+val primaryColorYellow = Color(0xFFFFE142)
+
+val sfProFont = FontFamily(
+    Font(R.font.sf_pro_medium)
+)
 
 @Preview
 @Composable
@@ -42,18 +61,42 @@ fun CurrentWeatherScreenII() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = Color(0xFFFF64D4))
+            .background(color = primaryColorYellow)
             .verticalScroll(rememberScrollState())
     ) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 20.dp)
+                .padding(top = 20.dp, bottom = 20.dp)
 
         ) {
-            val (cityNameField, dateField, tempFeild, tempValueFeild, tempDetailCard, hourlyForecatLazyRow, hourlyForecatFeild) = createRefs()
+            val rightGuideline = createGuidelineFromStart(0.4f)
+
+            val (cityNameField,
+                dateField,
+                dailySummaryParagraph,
+                tempFeild,
+                tempValueFeild,
+                tempDetailCard,
+                hourlyForecatLazyRow,
+                hourlyForecatFeild,
+                dailySummaryTextField,
+                sidebarIcon,
+                hourlyForecastGraph) = createRefs()
+
+            Icon(
+                imageVector = Icons.Default.Menu,
+                contentDescription = "sidebar icon",
+                modifier = Modifier
+                    .size(34.dp)
+                    .constrainAs(sidebarIcon) {
+                        start.linkTo(parent.start, margin = 18.dp)
+                        bottom.linkTo(cityNameField.bottom)
+                        top.linkTo(cityNameField.top)
+                    })
             Text(
-                text = "Jaipur",
+                text = "Paris",
+                fontFamily = sfProFont,
                 modifier = Modifier
                     .constrainAs(cityNameField) {
                         start.linkTo(parent.start)
@@ -65,6 +108,8 @@ fun CurrentWeatherScreenII() {
 
             Text(
                 text = "Monday, 19 June",
+                fontFamily = sfProFont,
+
                 modifier = Modifier
                     .constrainAs(dateField) {
                         start.linkTo(parent.start)
@@ -74,28 +119,50 @@ fun CurrentWeatherScreenII() {
                     .background(color = Color.Black, shape = RoundedCornerShape(34.dp))
                     .padding(horizontal = 12.dp, vertical = 4.dp),
 
-                color = Color(0xFFFF64D4),
+                color = primaryColorYellow,
                 fontWeight = FontWeight.Bold,
             )
 
-            Text("Rain", modifier = Modifier
-                .constrainAs(tempFeild) {
+            Text("Rain",
+                fontFamily = sfProFont,
+                modifier = Modifier
+                    .constrainAs(tempFeild) {
+                        top.linkTo(dateField.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .padding(top = 10.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+
+            Text(text = "27°",
+                fontFamily = sfProFont,
+                fontSize = 190.sp, modifier = Modifier.constrainAs(tempValueFeild) {
                     top.linkTo(dateField.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
-                .padding(top = 10.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                })
 
-            Text(text = "27°", fontSize = 190.sp, modifier = Modifier.constrainAs(tempValueFeild) {
-                top.linkTo(dateField.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            })
+            Text(
+                text = "Daily Summary",
+                fontFamily = sfProFont,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 22.sp,
+                modifier = Modifier.constrainAs(dailySummaryTextField) {
+                    top.linkTo(tempValueFeild.bottom)
+                    start.linkTo(parent.start, margin = 18.dp)
+                })
+            DailyWeatherSummaryView(
+                modifier = Modifier
+                    .padding(horizontal = 18.dp)
+                    .constrainAs(dailySummaryParagraph) {
+                        top.linkTo(dailySummaryTextField.bottom, margin = 8.dp)
+                        start.linkTo(tempDetailCard.start)
+                        end.linkTo(tempDetailCard.end)
+                    })
             Card(
                 modifier = Modifier
-                    .padding(horizontal = 24.dp)
+                    .padding(horizontal = 18.dp)
                     .constrainAs(tempDetailCard) {
-                        top.linkTo(tempValueFeild.bottom)
+                        top.linkTo(dailySummaryParagraph.bottom, margin = 18.dp)
                     },
                 shape = RoundedCornerShape(12.dp),
             ) {
@@ -122,12 +189,19 @@ fun CurrentWeatherScreenII() {
                     )
                 }
             }
-            WeeklyForecastView(
+            HourlyForecastView(
                 modifier = Modifier
                     .constrainAs(hourlyForecatLazyRow) {
                         top.linkTo(tempDetailCard.bottom, margin = 16.dp)
                         start.linkTo(tempDetailCard.start)
                         end.linkTo(tempDetailCard.end)
+                    })
+            HourlyGraph(
+                modifier = Modifier
+                    .padding(horizontal = 18.dp)
+                    .border(2.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
+                    .constrainAs(hourlyForecastGraph) {
+                        top.linkTo(hourlyForecatLazyRow.bottom, margin = 18.dp)
                     })
 
         }
@@ -148,7 +222,7 @@ fun WeatherDetailItem(
     {
         Icon(
             imageVector = itemIcon,
-            tint = Color(0xFFFF64D4),
+            tint = primaryColorYellow,
             contentDescription = "item icon",
             modifier = Modifier
                 .scale(1.5f)
@@ -156,16 +230,18 @@ fun WeatherDetailItem(
         )
         Text(
             text = headingText,
-            fontSize = 16.sp,
+            fontFamily = sfProFont,
+            fontSize = 18.sp,
             modifier = Modifier.padding(bottom = 8.dp),
             style = MaterialTheme.typography.body2,
-            color = Color(0xFFFF64D4),
+            color = primaryColorYellow,
             fontWeight = FontWeight.W600
         )
         Text(
             text = subHeadingText,
-            color = Color(0xFFFF64D4),
-            fontSize = 12.sp,
+            fontFamily = sfProFont,
+            color = primaryColorYellow,
+            fontSize = 16.sp,
             style = MaterialTheme.typography.body2,
             fontWeight = FontWeight.W600
         )
@@ -173,11 +249,12 @@ fun WeatherDetailItem(
 }
 
 @Composable
-fun WeeklyForecastView(modifier: Modifier) {
+fun HourlyForecastView(modifier: Modifier) {
     ConstraintLayout(modifier) {
         val (weeklyForecastText, arrowIcon, weeklyForecastRow) = createRefs()
         Text(
-            text = "Weekly Forecast",
+            text = "Hourly Forecast",
+            fontFamily = sfProFont,
             fontWeight = FontWeight.Bold,
             fontSize = 18.sp,
             modifier = Modifier.constrainAs(weeklyForecastText) {
@@ -199,10 +276,10 @@ fun WeeklyForecastView(modifier: Modifier) {
                     top.linkTo(weeklyForecastText.bottom, margin = 12.dp)
                 }
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             items(9) {
-                WeeklyForecastItem()
+                HourlyForecastItem()
             }
         }
     }
@@ -210,7 +287,7 @@ fun WeeklyForecastView(modifier: Modifier) {
 
 @Preview
 @Composable
-fun WeeklyForecastItem() {
+fun HourlyForecastItem() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -220,11 +297,34 @@ fun WeeklyForecastItem() {
                 color = Color.Black,
                 shape = RoundedCornerShape(12.dp)
             )
-            .padding(12.dp)
+            .padding(vertical = 12.dp, horizontal = 18.dp)
     ) {
-        Text("26°", fontSize = 16.sp)
+        Text(
+            "26°", fontSize = 18.sp, fontFamily = sfProFont,
+        )
         Icon(imageVector = Icons.Default.WaterDrop, contentDescription = "temp icon")
-        Text("31 Jan", fontSize = 12.sp)
+        Text(
+            "3 pm", fontSize = 16.sp, fontFamily = sfProFont,
+        )
 
     }
+}
+
+@Composable
+fun DailyWeatherSummaryView(modifier: Modifier) {
+    val text =
+        "Now it feels like 31, but actually it is 33. Today, the temperature is felt in the range from 31 to 27"
+
+    Text(
+        modifier = modifier,
+        fontFamily = sfProFont,
+        text = buildAnnotatedString {
+            append(
+                AnnotatedString(
+                    text = text,
+                )
+            )
+        },
+        fontSize = 18.sp,
+    )
 }
