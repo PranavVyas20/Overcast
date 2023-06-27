@@ -62,22 +62,20 @@ fun RepeatingCloudsAnimation() {
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 500, 1000),
             repeatMode = RepeatMode.Restart
-
-        ),
+        )
     )
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        if (!animationRunning) {
-            Button(
-                onClick = { animationRunning = true },
-                modifier = Modifier.align(Alignment.BottomEnd)
-            ) {
-                Text("Start Animation")
-            }
-        } else {
+        Button(
+            onClick = { animationRunning = !animationRunning },
+            modifier = Modifier.align(Alignment.BottomEnd)
+        ) {
+            Text("Start Animation")
+        }
+        if (animationRunning) {
             Image(
                 painter = painterResource(id = R.drawable.loading_clouds),
                 contentDescription = "Image",
@@ -87,5 +85,6 @@ fun RepeatingCloudsAnimation() {
                     .fillMaxSize()
             )
         }
+
     }
 }
