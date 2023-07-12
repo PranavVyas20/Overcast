@@ -25,7 +25,7 @@ fun LocationSuggestionLayout(
     Column(
         Modifier
             .background(Color.White)
-            .padding(start = 10.dp, end = 10.dp)
+            .padding(top = 10.dp,start = 10.dp, end = 10.dp)
     ) {
         locationSuggestions.forEach {
             LocationSuggestionItem(
