@@ -3,6 +3,7 @@ package com.example.daggerhilttest.screens
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -16,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,12 +69,28 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ExpandableSearchBar(
+                primaryModifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp)
+                    .placeholder(
+                        visible = currentWeatherState.isLoading,
+                        color = shimmerColor,
+                        shape = RoundedCornerShape(8.dp),
+                        highlight = PlaceholderHighlight.shimmer(
+                            highlightColor = Color.White,
+                        )
+                    ),
                 onLocationSuggestionItemClick = weatherViewModel::getLatLongByPlaceId,
+                nonExpandedModifier = Modifier.padding(vertical = 8.dp),
+                expandedModifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+                    .background(color = Color(0xFFEBDEFF), shape = RoundedCornerShape(26.dp))
+                    .clip(RoundedCornerShape(26.dp)),
                 showLocationSuggestionsView = showLocationSuggestionsView,
                 autoSuggestLocation = weatherViewModel::tryAutoComplete,
                 placeSuggestions = weatherViewModel.placeSuggestions,
                 locationName = if (currentWeatherState.data != null) currentWeatherState.data.cityName!! else "",
-                placeHolderVisibility = currentWeatherState.isLoading,
             )
             Box {
                 Column() {
@@ -128,7 +146,5 @@ fun CurrentWeatherScreen(weatherViewModel: WeatherViewModel) {
             }
         }
     }
-
-
 }
 
