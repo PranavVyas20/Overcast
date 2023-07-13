@@ -47,14 +47,11 @@ import com.google.accompanist.placeholder.shimmer
 @Preview
 @Composable
 fun CurrentWeatherScreenBottomSheet() {
-    val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Expanded)
     val configuration = LocalConfiguration.current
-
     val screenHeight = remember { configuration.screenHeightDp.dp }
 
-    // Calculate the peek height as 70% of the screen height
+    // Calculate the peek height as 65% of the screen height
     val peekHeight = screenHeight * 0.65f
-    var maxHeight by remember { mutableStateOf(screenHeight * 0.92f) }
     val scaffoldState = rememberBottomSheetScaffoldState()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -93,8 +90,8 @@ fun CurrentWeatherScreenBottomSheet() {
             sheetBackgroundColor = Color.Transparent,
             sheetContent = {
                 CurrentWeatherScreen_V4()
-            }) { innerPadding ->
-            BottomSheetScafoldContent()
+            }) {
+            BottomSheetScaffoldContent()
         }
     }
 }

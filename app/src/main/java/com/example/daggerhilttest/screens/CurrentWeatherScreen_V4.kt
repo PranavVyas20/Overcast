@@ -23,9 +23,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.HistoryToggleOff
+import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Radar
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.outlined.NightsStay
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +59,7 @@ import com.example.daggerhilttest.models.WeatherExtraDetail
 import com.example.daggerhilttest.ui.theme.productSans
 import com.example.daggerhilttest.ui_components.ExpandableSearchBar
 import com.example.daggerhilttest.ui_components.MaterialSearchBar
+import com.example.daggerhilttest.ui_components.WeatherExtraDetailItem
 import com.example.daggerhilttest.util.WeatherExtraDetailType
 
 @Preview
@@ -65,9 +71,40 @@ fun CurrentWeatherScreen_V4() {
             .background(color = Color(0xFFF6EDFF))
     ) {
         item {
-            WeatherDetailsView(PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp))
-
+            WeatherDetailsGridView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                noOfItemsInRow = 2,
+                weatherDetailItems = listOf(
+                    WeatherExtraDetail(
+                        type = WeatherExtraDetailType.WIND_SPEED,
+                        title = "Wind Speed",
+                        value = "12km/h",
+                        icon = Icons.Default.Air
+                    ),
+                    WeatherExtraDetail(
+                        type = WeatherExtraDetailType.WIND_SPEED,
+                        title = "Wind Speed",
+                        value = "12km/h",
+                        icon = Icons.Default.Air
+                    ),
+                    WeatherExtraDetail(
+                        type = WeatherExtraDetailType.WIND_SPEED,
+                        title = "Wind Speed",
+                        value = "12km/h",
+                        icon = Icons.Default.Air
+                    ),
+                    WeatherExtraDetail(
+                        type = WeatherExtraDetailType.WIND_SPEED,
+                        title = "Wind Speed",
+                        value = "12km/h",
+                        icon = Icons.Default.Air
+                    )
+                )
+            )
         }
+
         item {
             HourlyForecastView(
                 paddingValues = PaddingValues(
@@ -89,7 +126,26 @@ fun CurrentWeatherScreen_V4() {
 
         }
         item {
-            MinMaxTempView(paddingValues = PaddingValues(16.dp))
+            WeatherDetailsGridView(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                noOfItemsInRow = 2,
+                weatherDetailItems = listOf(
+                    WeatherExtraDetail(
+                        type = WeatherExtraDetailType.SUNRISE,
+                        title = "Sunrise",
+                        value = "5:23 AM",
+                        icon = Icons.Outlined.WbSunny
+                    ),
+                    WeatherExtraDetail(
+                        type = WeatherExtraDetailType.SUNSET,
+                        title = "Sunset",
+                        value = "7:59 PM",
+                        icon = Icons.Outlined.NightsStay
+                    ),
+                )
+            )
         }
     }
 
@@ -97,7 +153,7 @@ fun CurrentWeatherScreen_V4() {
 
 @Preview
 @Composable
-fun BottomSheetScafoldContent() {
+fun BottomSheetScaffoldContent() {
     val configuration = LocalConfiguration.current
     val screenHeight = remember { configuration.screenHeightDp.dp }
     val layoutHeight = screenHeight * 0.25f
@@ -184,7 +240,7 @@ fun BottomSheetScafoldContent() {
 }
 
 @Composable
-fun WeatherDetailItem() {
+fun WeatherExtraDetailItem(weatherExtraDetail: WeatherExtraDetail) {
     ConstraintLayout(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
@@ -204,7 +260,7 @@ fun WeatherDetailItem() {
                 bottom.linkTo(parent.bottom, margin = 18.dp)
             }) {
             Icon(
-                imageVector = Icons.Default.HistoryToggleOff,
+                imageVector = weatherExtraDetail.icon,
                 contentDescription = "",
                 modifier = Modifier
                     .height(16.dp)
@@ -219,7 +275,7 @@ fun WeatherDetailItem() {
                 end.linkTo(parent.end, margin = 12.dp)
             }) {
             Text(
-                text = "Wind speed",
+                text = weatherExtraDetail.title,
                 fontSize = 14.sp,
                 fontFamily = productSans,
                 letterSpacing = 0.25.sp,
@@ -227,7 +283,7 @@ fun WeatherDetailItem() {
             )
 
             Text(
-                "12km/h", fontSize = 14.sp,
+                weatherExtraDetail.value, fontSize = 14.sp,
                 fontFamily = productSans,
                 letterSpacing = 0.15.sp,
                 fontWeight = FontWeight(400)
@@ -237,94 +293,27 @@ fun WeatherDetailItem() {
 
 }
 
-@Preview
 @Composable
-fun WeatherDetailsViewCustomPreview() {
-    WeatherDetailsViewCustom(
-        numRows = 2,
-        weatherDetailItemsCount = 2,
-        weatherDetailItems = listOf()
-    )
-}
-
-@Composable
-fun WeatherDetailsViewCustom(
-    numRows: Int,
-    weatherDetailItemsCount: Int,
-    weatherDetailItems: List<String>
+fun WeatherDetailsGridView(
+    modifier: Modifier,
+    noOfItemsInRow: Int,
+    weatherDetailItems: List<WeatherExtraDetail>
 ) {
+    val chunkedList = weatherDetailItems.chunked(noOfItemsInRow)
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        repeat(numRows) {
+        for (subList in chunkedList) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                repeat(weatherDetailItemsCount) {
+                subList.forEach { it ->
                     Box(modifier = Modifier.weight(1f)) {
-                        WeatherDetailItem()
+                        WeatherExtraDetailItem(it)
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun WeatherDetailsView(paddingValues: PaddingValues) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(paddingValues),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(modifier = Modifier.weight(1f)) {
-                WeatherDetailItem()
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                WeatherDetailItem()
-            }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(modifier = Modifier.weight(1f)) {
-                WeatherDetailItem()
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                WeatherDetailItem()
-            }
-        }
-    }
-}
-
-@Composable
-fun MinMaxTempView(paddingValues: PaddingValues) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(paddingValues),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Box(modifier = Modifier.weight(1f)) {
-                WeatherDetailItem()
-            }
-            Box(modifier = Modifier.weight(1f)) {
-                WeatherDetailItem()
             }
         }
     }
@@ -403,7 +392,7 @@ fun HourlyForecastView(paddingValues: PaddingValues) {
             .background(color = Color(0xFFEBDEFF))
     ) {
         val (icon, headingTextField, hourlyForecastLazyRow) = createRefs()
-        Box(modifier = Modifier
+        Box(contentAlignment = Alignment.Center, modifier = Modifier
             .height(28.dp)
             .width(28.dp)
             .clip(CircleShape)
@@ -411,7 +400,15 @@ fun HourlyForecastView(paddingValues: PaddingValues) {
             .constrainAs(icon) {
                 top.linkTo(parent.top, margin = 12.dp)
                 start.linkTo(parent.start, margin = 11.dp)
-            })
+            }) {
+            Icon(
+                modifier = Modifier
+                    .height(16.dp)
+                    .width(16.dp),
+                imageVector = Icons.Default.HistoryToggleOff,
+                contentDescription = "hourly_forecast_icon"
+            )
+        }
 
         Text(
             "Hourly Forecast",
@@ -563,10 +560,53 @@ fun WeeklyForecastItem() {
 
 @Preview
 @Composable
-fun WeatherExtraDetailPreview() {
-    WeatherDetailItem(
-
+fun WeatherExtraDetailItemPreview() {
+    WeatherExtraDetailItem(
+        weatherExtraDetail = WeatherExtraDetail(
+            type = WeatherExtraDetailType.WIND_SPEED,
+            title = "Wind Speed",
+            value = "12km/h",
+            icon = Icons.Default.Air
+        )
     )
 }
+
+@Preview
+@Composable
+fun WeatherDetailsGridViewPreview() {
+    WeatherDetailsGridView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        noOfItemsInRow = 2,
+        weatherDetailItems = listOf(
+            WeatherExtraDetail(
+                type = WeatherExtraDetailType.WIND_SPEED,
+                title = "Wind Speed",
+                value = "12km/h",
+                icon = Icons.Default.Air
+            ),
+            WeatherExtraDetail(
+                type = WeatherExtraDetailType.WIND_SPEED,
+                title = "Wind Speed",
+                value = "12km/h",
+                icon = Icons.Default.Air
+            ),
+            WeatherExtraDetail(
+                type = WeatherExtraDetailType.WIND_SPEED,
+                title = "Wind Speed",
+                value = "12km/h",
+                icon = Icons.Default.Air
+            ),
+            WeatherExtraDetail(
+                type = WeatherExtraDetailType.WIND_SPEED,
+                title = "Wind Speed",
+                value = "12km/h",
+                icon = Icons.Default.Air
+            )
+        )
+    )
+}
+
 
 
