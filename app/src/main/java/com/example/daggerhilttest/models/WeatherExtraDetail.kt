@@ -9,5 +9,6 @@ import com.example.daggerhilttest.util.WeatherExtraDetailType
 data class WeatherExtraDetail(
     val type: WeatherExtraDetailType,
     val title: String,
+    val value: String,
     val icon: ImageVector = Icons.Default.HistoryToggleOff
 )
