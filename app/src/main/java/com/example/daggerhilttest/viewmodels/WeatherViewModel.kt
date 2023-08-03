@@ -36,9 +36,19 @@ class WeatherViewModel @Inject constructor(
     private val placesClient: PlacesClient
 ) : ViewModel() {
 
-    data class UIState<T : Any>(
-        val isLoading: Boolean = true, val data: T? = null, val error: String = ""
-    )
+//    data class UIState<T : Any>(
+//        val isLoading: Boolean = true, val data: T? = null, val error: String = ""
+//    )
+sealed class UIState<T> {
+
+    data class Success<T>(val data: T) : UIState<T>()
+
+    data class Error<T>(val message: String?) : UIState<T>()
+
+    class Loading<T> : UIState<T>()
+    data class Initialised<T>(val data: T? = null): UIState<T>()
+
+}
 
     var currentLocationLatLong: LatLong? = null
 
