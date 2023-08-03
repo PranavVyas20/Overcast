@@ -64,6 +64,15 @@ sealed class UIState<T> {
     private val _currentWeatherState = mutableStateOf<UIState<CurrentWeather>>(UIState())
     val currentWeatherState get() = _currentWeatherState
 
+
+    // NEW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+    var currentWeatherStateV3 = MutableStateFlow<UIState<CurrentWeather_v2>>(UIState.Initialised())
+    private set
+    var currentWeatherStateV2 =  mutableStateOf<UIState<CurrentWeather_v2>>(UIState.Initialised())
+    private set
+
+    // NEW!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
     private val _todayHourlyForecastState =
         mutableStateOf<UIState<List<HourlyForecastLocal>>>(UIState(data = tempList))
     val todayHourlyForecast get() = _todayHourlyForecastState
