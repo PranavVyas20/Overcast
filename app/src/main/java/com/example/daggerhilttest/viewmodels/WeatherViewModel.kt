@@ -100,11 +100,13 @@ sealed class UIState<T> {
         placesClient.fetchPlace(request).addOnSuccessListener { response: FetchPlaceResponse ->
             val place = response.place
             Log.i("fetchPlaceTagg", "Place found: $place")
-            if (place.latLng != null) {
-                placeSuggestions.clear()
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(150)
-                    getCurrentWeatherByLatLong(place.latLng.latitude, place.latLng.longitude)
+            placeSuggestions.clear()
+            viewModelScope.launch {
+                delay(150)
+                place.latLng?.let { it1 ->
+                    place.latLng?.let { it2 ->
+                        getCurrentWeatherByLatLong(it1.latitude, it2.longitude)
+                    }
                 }
             }
         }.addOnFailureListener { exception: Exception ->
@@ -113,7 +115,7 @@ sealed class UIState<T> {
     }
 
     fun tryAutoComplete(query: String) {
-        CoroutineScope(Dispatchers.Default).launch {
+        viewModelScope.launch {
             val token = AutocompleteSessionToken.newInstance()
             val request =
                 FindAutocompletePredictionsRequest.builder().setSessionToken(token).setQuery(query)
@@ -152,13 +154,11 @@ sealed class UIState<T> {
     }
 
     fun saveLatLongInDataStorePref(lat: Double, long: Double) {
-        CoroutineScope(Dispatchers.IO).launch {
-            viewModelScope.async {
-                dataStorePref.edit { preferences ->
-                    preferences[PreferencesKeys.SAVED_LAT] = lat
-                    preferences[PreferencesKeys.SAVED_LONG] = long
-                }
-            }.await()
+        viewModelScope.launch {
+            dataStorePref.edit { preferences ->
+                preferences[PreferencesKeys.SAVED_LAT] = lat
+                preferences[PreferencesKeys.SAVED_LONG] = long
+            }
         }
     }
 
