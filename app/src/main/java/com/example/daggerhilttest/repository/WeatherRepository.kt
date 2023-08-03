@@ -13,8 +13,18 @@ import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
 import retrofit2.Response
 
-class WeatherRepository (private val weatherApi: WeatherApi) {
+class WeatherRepository(private val weatherApi: WeatherApi) : BaseApiResponse() {
 
+    suspend fun getWeather(lat: Double, long: Double): Flow<Resource_v2<WeatherResponse>> {
+        return flow {
+            emit(Resource_v2.Loading())
+            emit(
+                safeApiCall {
+                    weatherApi.getWeatherData(lat, long, Constants.WEATHER_API_KEY_v2)
+                }
+            )
+        }
+    }
     suspend fun getCurrentWeatherByLatLong(lat: Double, long: Double): Flow<Resource<CurrentWeather>> {
         return flow{
             emit(Resource(Constants.WeatherApiStatus.STATUS_LOADING))
