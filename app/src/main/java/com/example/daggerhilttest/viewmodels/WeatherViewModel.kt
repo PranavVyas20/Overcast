@@ -143,14 +143,12 @@ sealed class UIState<T> {
         return (cel * 10.0).roundToInt() / 10.0
     }
 
-     suspend fun getLatLongFromDataStorePref(): LatLong? {
-        val savedLat = dataStorePref.data.first()[PreferencesKeys.SAVED_LAT]
-        val savedLong = dataStorePref.data.first()[PreferencesKeys.SAVED_LONG]
-        return if (savedLat == null && savedLong == null) {
-            null
-        } else {
-            LatLong(savedLat, savedLong)
-        }
+     fun getLatLongFromDataStorePref(callback: (latLong: LatLong) -> Unit){
+         viewModelScope.launch {
+             val savedLat = dataStorePref.data.first()[PreferencesKeys.SAVED_LAT]
+             val savedLong = dataStorePref.data.first()[PreferencesKeys.SAVED_LONG]
+              callback.invoke(LatLong(savedLat, savedLong))
+         }
     }
 
     fun saveLatLongInDataStorePref(lat: Double, long: Double) {
