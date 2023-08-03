@@ -221,6 +221,29 @@ sealed class UIState<T> {
         }
     }
 
+    fun getWeather(lat: Double, long: Double) {
+        viewModelScope.launch {
+          weatherRepository.getWeather(lat, long).collect { response ->
+                when (response) {
+                    is Resource_v2.Error -> {
+                        currentWeatherStateV3.value = UIState.Error(
+                            message = response.message?:"Some error occurred"
+                        )
+                    }
+                    is Resource_v2.Loading -> {
+                        currentWeatherStateV3.value = UIState.Loading()
+
+                    }
+                    is Resource_v2.Success -> {
+                        currentWeatherStateV3.value = UIState.Success(
+                            data = response.data.currentWeather
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun getCurrentWeatherByLatLong(lat: Double, long: Double) {
         Log.d("apiCall", "$lat $long")
         weatherRepository.getCurrentWeatherByLatLong(lat, long).onEach { result ->
