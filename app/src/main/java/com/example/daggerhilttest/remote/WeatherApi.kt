@@ -1,8 +1,8 @@
 package com.example.daggerhilttest.remote
 
-import com.example.daggerhilttest.models.CurrentWeather
-import com.example.daggerhilttest.models.HourlyForecast
-import com.example.daggerhilttest.models.WeatherResponse
+import com.example.daggerhilttest.models.v1.CurrentWeather
+import com.example.daggerhilttest.models.v1.HourlyForecast
+import com.example.daggerhilttest.models.v2.WeatherResponseV2
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -15,7 +15,7 @@ interface WeatherApi {
         @Path("latitude") latitude: Double,
         @Path("longitude") longitude: Double,
         @Query("key") apiKey: String,
-    ): Response<WeatherResponse>
+    ): Response<WeatherResponseV2>
 
     @GET("weather")
     suspend fun getCurrentWeatherByLatLong(
