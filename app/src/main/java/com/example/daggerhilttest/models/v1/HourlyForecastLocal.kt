@@ -1,4 +1,4 @@
-package com.example.daggerhilttest.models
+package com.example.daggerhilttest.models.v1
 
 data class HourlyForecastLocal(
     val temp:Double? = null,

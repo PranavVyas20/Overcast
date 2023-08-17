@@ -1,4 +1,4 @@
-package com.example.daggerhilttest.models
+package com.example.daggerhilttest.models.v2
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
@@ -7,12 +7,22 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Waves
 import androidx.compose.material.icons.outlined.NightsStay
+import com.example.daggerhilttest.constants.Constants
+import com.example.daggerhilttest.models.v1.WeatherExtraDetailItem
 import com.example.daggerhilttest.util.WeatherExtraDetailType
 import com.google.gson.annotations.SerializedName
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.math.roundToInt
 
 data class CurrentWeatherResponseV2(
     @SerializedName("datetime")
     val dateTime: String?,
+    @SerializedName("datetimeEpoch")
+    val dateTimeEpoch: Long?,
+    @SerializedName("hours")
+    val hours: List<HourlyForecastResponseV2>?,
     @SerializedName("temp")
     val temperature: Double?,
     @SerializedName("tempmin")
@@ -40,13 +50,62 @@ data class CurrentWeatherResponseV2(
     @SerializedName("sunset")
     val sunset: String?,
 )
+
+private fun convertTempToCelsius(kFarenheit: Double): Double {
+    val cel = ((kFarenheit - 32) * 5) / 9
+    return (cel * 10.0).roundToInt() / 10.0
+}
+
+private fun convertTo12HourFormat(
+    timeString: String,
+): String {
+    val timeParts = timeString.split(":")
+    val hours = timeParts[0].toInt()
+    val minutes = timeParts[1]
+
+    val amOrPm = if (hours >= 12) "PM" else "AM"
+
+    var hours12Format = if (hours % 12 == 0) 12 else hours % 12
+    if (hours12Format < 10) {
+        hours12Format = "0$hours12Format".toInt()
+    }
+    return "$hours12Format:$minutes $amOrPm"
+}
+
+fun convertEpochTimeToFormattedDateTime(epochSeconds: Long): String {
+    val sdf = SimpleDateFormat("MMMM dd, h:mm a", Locale.ENGLISH)
+    val date = Date(epochSeconds * 1000)
+    return sdf.format(date)
+}
+
+fun convertEpochToFormattedTime(epochSeconds: Long): String {
+    val sdf = SimpleDateFormat("ha", Locale.ENGLISH)
+    val date = Date(epochSeconds * 1000) // Convert seconds to milliseconds
+    return sdf.format(date)
+}
+
+private fun getIconUrl(icon: String): String {
+    return "${Constants.BASE_WEATHER_ICON_URL}$icon${Constants.WEATHER_ICON_URL_SUFFIX}"
+}
+
+private fun HourlyForecastResponseV2.toHourlyForecastDataV2() =
+    HourlyForecastDataV2(
+        temp = temp?.let { convertTempToCelsius(it)} ?:0.0,
+        formattedTime = dateTimeEpoch?.let { convertEpochToFormattedTime(it) } ?:"na",
+        icon = icon?.let { getIconUrl(it) } ?: ""
+    )
+
+private fun List<HourlyForecastResponseV2>.toHourlyForecastListData(): List<HourlyForecastDataV2> {
+    return this.map { it.toHourlyForecastDataV2() }
+}
 private fun CurrentWeatherResponseV2.toWeatherForecastData() =
     WeatherForecastData(
-        temp = temperature ?: 0.0,
-        minTemp = tempMin ?: 0.0,
-        maxTemp = tempMax ?: 0.0,
-        dateTime = dateTime ?: "",
-        icon = icon ?: ""
+        temp = temperature?.let { convertTempToCelsius(it) } ?: 0.0,
+        minTemp = tempMin?.let { convertTempToCelsius(it) } ?: 0.0,
+        maxTemp = tempMax?.let { convertTempToCelsius(it) } ?: 0.0,
+        dateTime = dateTimeEpoch?.let { convertEpochTimeToFormattedDateTime(it) } ?: "",
+        hourlyForecastData = hours?.toHourlyForecastListData() ?: listOf(),
+        icon = icon?.let { getIconUrl(it) } ?: ""
     )
 
 fun List<CurrentWeatherResponseV2>.toWeatherForecastListData(): List<WeatherForecastData> {
@@ -54,13 +113,15 @@ fun List<CurrentWeatherResponseV2>.toWeatherForecastListData(): List<WeatherFore
         it.toWeatherForecastData()
     }
 }
-fun CurrentWeatherResponseV2.toCurrentWeatherData() : CurrentWeatherDataV2 =
+
+fun CurrentWeatherResponseV2.toCurrentWeatherData(): CurrentWeatherDataV2 =
     CurrentWeatherDataV2(
-        dateTime = dateTime.toString(),
-        feelsLikeTemp = feelsLikeTemp?:0.0,
-        temperature = temperature?:0.0,
-        icon = icon?:"",
-        weatherCondition = weatherCondition?:"",
+        dateTime = dateTimeEpoch?.let { convertEpochTimeToFormattedDateTime(it) } ?: "",
+        dateTimeEpoch = dateTimeEpoch?.let { convertEpochTimeToFormattedDateTime(it) } ?: "",
+        feelsLikeTemp = feelsLikeTemp?.let { convertTempToCelsius(it) } ?: 0.0,
+        temperature = temperature?.let { convertTempToCelsius(it) } ?: 0.0,
+        icon = icon?.let { getIconUrl(it) } ?: "",
+        weatherCondition = weatherCondition ?: "",
         weatherDetailItems = this.toWeatherDetailItems(false),
         sunsetSunriseWeatherItems = this.toWeatherDetailItems(true)
     )
@@ -71,13 +132,13 @@ private fun CurrentWeatherResponseV2.toWeatherDetailItems(includeSunsetSunrise: 
             WeatherExtraDetailItem(
                 type = WeatherExtraDetailType.SUNSET,
                 title = "Sunset",
-                value = sunset.toString(),
+                value = convertTo12HourFormat(sunset.toString()),
                 icon = Icons.Outlined.NightsStay
             ),
             WeatherExtraDetailItem(
                 type = WeatherExtraDetailType.SUNRISE,
                 title = "Sunrise",
-                value = sunset.toString(),
+                value = convertTo12HourFormat(sunrise.toString()),
                 icon = Icons.Default.LightMode
             )
         )

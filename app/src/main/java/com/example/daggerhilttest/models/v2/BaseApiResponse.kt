@@ -1,4 +1,4 @@
-package com.example.daggerhilttest.models
+package com.example.daggerhilttest.models.v2
 import android.util.Log
 import com.example.daggerhilttest.util.Resource_v2
 import retrofit2.Response

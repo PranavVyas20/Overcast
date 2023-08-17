@@ -1,12 +1,11 @@
-package com.example.daggerhilttest.models
+package com.example.daggerhilttest.models.v1
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HistoryToggleOff
-import androidx.compose.material.icons.filled.Radar
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.daggerhilttest.util.WeatherExtraDetailType
 
-data class WeatherExtraDetail(
+data class WeatherExtraDetailItem(
     val type: WeatherExtraDetailType,
     val title: String,
     val value: String,
