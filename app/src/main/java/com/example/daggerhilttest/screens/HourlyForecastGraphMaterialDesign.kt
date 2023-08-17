@@ -1,51 +1,33 @@
 package com.example.daggerhilttest.screens
 
-import android.text.TextUtils
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.HistoryToggleOff
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import co.yml.charts.axis.AxisData
-import co.yml.charts.common.model.PlotType
-import co.yml.charts.common.model.Point
-import co.yml.charts.ui.linechart.LineChart
-import co.yml.charts.ui.linechart.model.GridLines
-import co.yml.charts.ui.linechart.model.IntersectionPoint
-import co.yml.charts.ui.linechart.model.Line
-import co.yml.charts.ui.linechart.model.LineChartData
-import co.yml.charts.ui.linechart.model.LinePlotData
-import co.yml.charts.ui.linechart.model.LineStyle
-import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
-import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
-import co.yml.charts.ui.linechart.model.ShadowUnderLine
+import com.example.daggerhilttest.models.v2.WeatherForecastData
+import com.example.daggerhilttest.ui.theme.darkPurpleColor
 import com.example.daggerhilttest.ui.theme.productSans
+import com.example.daggerhilttest.ui.theme.purpleBgColor
 import com.patrykandpatryk.vico.compose.axis.horizontal.bottomAxis
-import com.patrykandpatryk.vico.compose.axis.horizontal.topAxis
 import com.patrykandpatryk.vico.compose.axis.vertical.startAxis
 import com.patrykandpatryk.vico.compose.chart.Chart
 import com.patrykandpatryk.vico.compose.chart.line.lineChart
@@ -54,39 +36,30 @@ import com.patrykandpatryk.vico.compose.component.shape.shader.verticalGradient
 import com.patrykandpatryk.vico.compose.component.shape.textComponent
 import com.patrykandpatryk.vico.core.axis.AxisPosition
 import com.patrykandpatryk.vico.core.axis.formatter.AxisValueFormatter
-import com.patrykandpatryk.vico.core.component.marker.MarkerComponent
 import com.patrykandpatryk.vico.core.component.shape.LineComponent
 import com.patrykandpatryk.vico.core.component.text.TextComponent
+import com.patrykandpatryk.vico.core.dimensions.MutableDimensions
+import com.patrykandpatryk.vico.core.entry.FloatEntry
 import com.patrykandpatryk.vico.core.entry.entryModelOf
-import com.patrykandpatryk.vico.core.marker.Marker
-import kotlin.math.truncate
 
 @Composable
-fun rememberMarker() = MarkerComponent(
-    label = textComponent(color = Color.Red), guideline = null, indicator = null
-)
-
-private val markerMap: Map<Float, Marker>
-    @Composable get() = mapOf(
-        4f to rememberMarker(),
-        0f to rememberMarker(),
-        1f to rememberMarker(),
-        2f to rememberMarker(),
-        3f to rememberMarker()
-    )
-
-@Composable
-fun HourlyGraph(modifier: Modifier) {
-    val model1 = entryModelOf(0, 2, 4, 0, 2)
+fun HourlyGraph(modifier: Modifier, dayForecast: List<WeatherForecastData>) {
+    val graphPoints = remember {
+        handleGraphPointsCreationV2(dayForecast)
+    }
+    val graphModel = entryModelOf(graphPoints)
+    val days = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
     val yAxisValueFormatter = AxisValueFormatter<AxisPosition.Vertical.Start> { i, _ ->
-        "${i.toInt()}℃"
+        "${i.toInt()}°"
+    }
+    val xAxisValueFormatter = AxisValueFormatter<AxisPosition.Horizontal.Bottom> { i, j ->
+        days[i.toInt()]
     }
 
     val Black = Color(0xFF000000)
     ConstraintLayout(
         modifier = modifier
-
     ) {
         val (graph, icon, headingTextField) = createRefs()
 
@@ -109,50 +82,127 @@ fun HourlyGraph(modifier: Modifier) {
             )
         }
 
-        Text("Day Forecast",
+        Text(
+            text = "Day Forecast",
             fontSize = 14.sp,
             fontFamily = productSans,
             letterSpacing = 0.15.sp,
             fontWeight = FontWeight(400),
             modifier = Modifier.constrainAs(headingTextField) {
-                top.linkTo(parent.top, margin = 14.dp)
+                centerVerticallyTo(icon)
                 start.linkTo(icon.end, margin = 8.dp)
-
             })
         Chart(
             modifier = Modifier
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 4.dp)
                 .constrainAs(graph) {
                     top.linkTo(icon.bottom, margin = 20.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom, margin = 6.dp)
                 },
+            isHorizontalScrollEnabled = true,
             chart = lineChart(
-//            persistentMarkers = markerMap,
+                spacing = 40.dp,
+                minY = graphPoints.minOf { it.y } - 2,
                 lines = listOf(
                     lineSpec(
                         lineColor = Color.Black,
                         lineBackgroundShader = verticalGradient(
-                            arrayOf(Black.copy(0.2f), Black.copy(alpha = 0f)),
+                            arrayOf(darkPurpleColor.copy(0.4f), darkPurpleColor.copy(alpha = 0f)),
                         ),
                     ),
                 )
             ),
-            model = model1,
+            model = graphModel,
             startAxis = startAxis(
                 axis = null,
-                guideline = LineComponent(color = Color(0x21000000).toArgb(), thicknessDp = 2f),
                 tick = null,
+                label = textComponent(
+                    margins = MutableDimensions(
+                        verticalDp = 10f,
+                        horizontalDp = 20f
+                    )
+                ),
+                guideline = LineComponent(Color.LightGray.toArgb(), thicknessDp = 1.5f),
                 valueFormatter = yAxisValueFormatter
             ),
             bottomAxis = bottomAxis(
-                label = textComponent(color = Color.Black),
-                axis = null,
-                tick = null,
+                valueFormatter = xAxisValueFormatter,
                 guideline = null,
+                tick = null,
+                label = textComponent(
+                    margins = MutableDimensions(
+                        verticalDp = 20f,
+                        horizontalDp = 0f
+                    )
+                )
             ),
         )
+    }
+}
+
+private fun handleGraphPointsCreationV2(dayForecast: List<WeatherForecastData>): List<FloatEntry> {
+    return dayForecast.take(7).mapIndexed { index, weatherForecastData ->
+        FloatEntry(x = index.toFloat(), y = weatherForecastData.temp.toFloat())
+    }
+}
+
+@Preview
+@Composable
+fun GraphPreview() {
+    Surface {
+        val list = listOf<WeatherForecastData>(
+            WeatherForecastData(
+                temp = 28.0,
+                minTemp = 0.0,
+                maxTemp = 0.0,
+                hourlyForecastData = listOf(),
+                icon = "",
+                dateTime = ""
+            ),
+            WeatherForecastData(
+                temp = 29.0,
+                minTemp = 0.0,
+                maxTemp = 0.0,
+                hourlyForecastData = listOf(),
+                icon = "",
+                dateTime = ""
+            ),
+            WeatherForecastData(
+                temp = 30.0,
+                minTemp = 0.0,
+                maxTemp = 0.0,
+                hourlyForecastData = listOf(),
+                icon = "",
+                dateTime = ""
+            ),
+            WeatherForecastData(
+                temp = 28.0,
+                minTemp = 0.0,
+                maxTemp = 0.0,
+                hourlyForecastData = listOf(),
+                icon = "",
+                dateTime = ""
+            ),
+            WeatherForecastData(
+                temp = 29.0,
+                minTemp = 0.0,
+                maxTemp = 0.0,
+                hourlyForecastData = listOf(),
+                icon = "",
+                dateTime = ""
+            ),
+            WeatherForecastData(
+                temp = 28.0,
+                minTemp = 0.0,
+                maxTemp = 0.0,
+                hourlyForecastData = listOf(),
+                icon = "",
+                dateTime = ""
+            ),
+        )
+        HourlyGraph(modifier = Modifier, list)
     }
 }
 
