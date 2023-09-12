@@ -256,16 +256,15 @@ fun SearchBarV2(
     ConstraintLayout(
         modifier = modifier
     ) {
-        val (locationName, searchInputField) = createRefs()
+        val (location, searchInputField) = createRefs()
         Box(modifier = Modifier
-            .animateContentSize()
-            .constrainAs(locationName) {
+            .constrainAs(location) {
                 start.linkTo(parent.start, 18.dp)
                 top.linkTo(parent.top)
                 centerVerticallyTo(parent)
             }) {
             Text(
-                text = "New York", fontSize = 22.sp,
+                text = locationName, fontSize = 22.sp,
                 color = Color.White,
                 fontFamily = productSans,
                 fontWeight = FontWeight(400),
