@@ -282,6 +282,7 @@ fun SearchBarV2(
                     ) {
                         isExpanded.value = false
                         placeHolderText.value = ""
+                        searchQuery.value = ""
                     },
                     imageVector = Icons.Default.Close,
                     contentDescription = "close-icon"
