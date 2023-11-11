@@ -1,9 +1,6 @@
 package com.example.daggerhilttest.ui_components
 
-import android.widget.Space
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import com.example.daggerhilttest.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,20 +14,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
-import coil.compose.rememberAsyncImagePainter
-import com.example.daggerhilttest.constants.Constants
-import com.example.daggerhilttest.models.CurrentWeather
+import com.example.daggerhilttest.models.v1.CurrentWeather
 import com.example.daggerhilttest.ui.theme.shimmerColor
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.fade
 import com.google.accompanist.placeholder.placeholder
 import com.google.accompanist.placeholder.shimmer
 
@@ -61,18 +51,18 @@ fun CurrentWeatherCard(
                 contentScale = ContentScale.Crop
             )
             if (currentWeather != null) {
-                val date = weatherViewModel.getDateFromUnix(currentWeather.unixTime!!)
-                val time = weatherViewModel.getTimeFromUnix(currentWeather.unixTime)
-                val temp =
-                    weatherViewModel.convertTempToCelsius(currentWeather.mainTempData!!.temp!!)
-                val iconId = currentWeather.weatherList!![0].icon
-                val iconUrl = Constants.BASE_ICON_URL + iconId + Constants.ICON_URL_SUFFIX
-                WeatherCardDetails(
-                    date = date,
-                    time = time,
-                    temperature = temp.toString(),
-                    tempIconImageUrl = iconUrl
-                )
+//                val date = weatherViewModel.getDateFromUnix(currentWeather.unixTime!!)
+//                val time = weatherViewModel.getTimeFromUnix(currentWeather.unixTime)
+//                val temp =
+//                    weatherViewModel.convertTempToCelsius(currentWeather.mainTempData!!.temp!!)
+//                val iconId = currentWeather.weatherList!![0].icon
+//                val iconUrl = Constants.BASE_ICON_URL + iconId + Constants.ICON_URL_SUFFIX
+//                WeatherCardDetails(
+//                    date = date,
+//                    time = time,
+//                    temperature = temp.toString(),
+//                    tempIconImageUrl = iconUrl
+//                )
             } else {
                 Row(
                     modifier = Modifier

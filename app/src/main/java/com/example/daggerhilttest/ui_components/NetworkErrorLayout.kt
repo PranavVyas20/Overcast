@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,8 +21,9 @@ import kotlin.reflect.KSuspendFunction2
 fun NetworkErrorLayout(
     currentLat: Double,
     currentLong: Double,
-    getCurrentWeather: suspend (Double, Double) -> Unit
+    onRetry: suspend (Double, Double) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -35,8 +37,8 @@ fun NetworkErrorLayout(
         Text(text = "Network Error", modifier = Modifier.align(Alignment.CenterHorizontally))
         Button(
             onClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    getCurrentWeather(currentLat, currentLong)
+                coroutineScope.launch {
+                    onRetry(currentLat, currentLong)
                 }
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)

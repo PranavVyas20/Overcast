@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
+import co.yml.charts.common.extensions.isNotNull
 import com.birjuvachhani.locus.Locus
 import com.example.daggerhilttest.PreferencesKeys
 import com.example.daggerhilttest.R
@@ -24,7 +25,6 @@ import kotlinx.coroutines.launch
 class LocationSplashActivity : AppCompatActivity() {
     private val TAG = "activity_lifecycle"
     private val weatherViewModel: WeatherViewModel by viewModels()
-    private lateinit var savedLatLong: LatLong
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,25 +33,25 @@ class LocationSplashActivity : AppCompatActivity() {
     }
 
     private fun onStartUp() {
-        CoroutineScope(Dispatchers.Main).launch {
-            weatherViewModel.getLatLongFromDataStorePref().let {Latlong ->
-                if (Latlong != null) {
-                    startWeatherActivity(Latlong)
+            weatherViewModel.getLatLongFromDataStorePref { latLong ->
+                if (latLong.lat.isNotNull() && latLong.long.isNotNull()) {
+                    startWeatherActivity(latLong)
                 } else {
                     getLocation()
                 }
             }
-        }
     }
     private fun getLocation() {
         Locus.getCurrentLocation(this) { result ->
             result.location?.let {
                 weatherViewModel.saveLatLongInDataStorePref(it.latitude, it.longitude)
-                savedLatLong = LatLong(it.latitude, it.longitude)
-                startWeatherActivity(savedLatLong)
+                val userFetchedLocation = LatLong(it.latitude, it.longitude)
+                startWeatherActivity(userFetchedLocation)
             }
             Toast.makeText(this, "Location Fetched", Toast.LENGTH_SHORT).show()
-            result.error?.let {  }
+            result.error?.let {
+                Toast.makeText(this, "Error fetching location", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

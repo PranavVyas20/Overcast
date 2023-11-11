@@ -6,12 +6,6 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Cloud
-import androidx.compose.material.icons.outlined.Speed
-import androidx.compose.material.icons.outlined.Thermostat
-import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.daggerhilttest.models.CurrentWeather
+import com.example.daggerhilttest.models.v1.CurrentWeather
 import com.example.daggerhilttest.ui.theme.shimmerColor
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
 import com.google.accompanist.placeholder.PlaceholderHighlight
@@ -58,21 +52,21 @@ fun WeatherExtraDetailCard(
                     .padding(15.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                WeatherExtraDetailItem(
-                    itemIcon = Icons.Outlined.Thermostat,
-                    headingText = "${weatherViewModel.convertTempToCelsius(currentWeather.mainTempData!!.feelsLike!!)} ℃",
-                    subHeadingText = "Feels Like"
-                )
-                WeatherExtraDetailItem(
-                    itemIcon = Icons.Outlined.WaterDrop,
-                    headingText = "${currentWeather.mainTempData.humidity} %",
-                    subHeadingText = "Humidity"
-                )
-                WeatherExtraDetailItem(
-                    itemIcon = Icons.Outlined.Speed,
-                    headingText = "${currentWeather.mainTempData.pressure} hPa",
-                    subHeadingText = "Air Preassure"
-                )
+//                WeatherExtraDetailItem(
+//                    itemIcon = Icons.Outlined.Thermostat,
+//                    headingText = "${weatherViewModel.convertTempToCelsius(currentWeather.mainTempData!!.feelsLike!!)} ℃",
+//                    subHeadingText = "Feels Like"
+//                )
+//                WeatherExtraDetailItem(
+//                    itemIcon = Icons.Outlined.WaterDrop,
+//                    headingText = "${currentWeather.mainTempData.humidity} %",
+//                    subHeadingText = "Humidity"
+//                )
+//                WeatherExtraDetailItem(
+//                    itemIcon = Icons.Outlined.Speed,
+//                    headingText = "${currentWeather.mainTempData.pressure} hPa",
+//                    subHeadingText = "Air Preassure"
+//                )
             }
         } else {
             Row(modifier = Modifier.height(100.dp)){}

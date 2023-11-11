@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.example.daggerhilttest.R
 import com.example.daggerhilttest.models.PlaceSuggestion
 import com.example.daggerhilttest.ui.theme.productSans
@@ -201,11 +202,10 @@ fun ExpandableSearchBarPreview() {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchBarV2(
-    modifier: Modifier, onLocationSuggestionItemClick: (String) -> Unit,
-    autoSuggestLocation: (String) -> Unit,
-    placeSuggestions: MutableList<PlaceSuggestion>,
+    modifier: Modifier,
+    onTextQueryChanged: (query: String) -> Unit,
+    onCloseIconClicked: () -> Unit,
     locationName: String,
-    showLocationSuggestionsView: MutableState<Boolean>
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -256,21 +256,23 @@ fun SearchBarV2(
     ConstraintLayout(
         modifier = modifier
     ) {
-        val (location, searchInputField) = createRefs()
-        Box(modifier = Modifier
-            .constrainAs(location) {
-                start.linkTo(parent.start, 18.dp)
-                top.linkTo(parent.top)
-                centerVerticallyTo(parent)
-            }) {
-            Text(
-                text = locationName, fontSize = 22.sp,
-                color = Color.White,
-                fontFamily = productSans,
-                fontWeight = FontWeight(400),
-            )
-        }
+        val (location, searchInputField, searchSuggestionsView) = createRefs()
+        Text(
+            modifier = Modifier
+                .constrainAs(location) {
+                    start.linkTo(parent.start, 18.dp)
+                    top.linkTo(parent.top)
+                    centerVerticallyTo(parent)
+                },
+            text = locationName, fontSize = 22.sp,
+            color = Color.White,
+            fontFamily = productSans,
+            fontWeight = FontWeight(400),
+        )
+
+
         TextField(value = searchQuery.value, onValueChange = {
+            onTextQueryChanged(it)
             searchQuery.value = it
         }, placeholder = { Text(placeHolderText.value) }, trailingIcon = {
             if (isFullyExpanded.value) {
@@ -279,7 +281,9 @@ fun SearchBarV2(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }
                     ) {
+                        onCloseIconClicked()
                         isExpanded.value = false
+                        keyboardController?.hide()
                         placeHolderText.value = ""
                         searchQuery.value = ""
                     },
@@ -325,3 +329,14 @@ fun SearchBarV2(
         ))
     }
 }
+
+@Composable
+fun SearchSuggestionView(modifier: Modifier, locationSuggestion: List<String>) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        locationSuggestion.forEach { location ->
+            Text(text = location)
+        }
+    }
+}
+
+

@@ -85,7 +85,7 @@ fun convertEpochToFormattedTime(epochSeconds: Long): String {
 }
 
 private fun getIconUrl(icon: String): String {
-    return "${Constants.BASE_WEATHER_ICON_URL}$icon${Constants.WEATHER_ICON_URL_SUFFIX}"
+    return "${Constants.VISUAL_CROSSING_BASE_WEATHER_ICON_URL}$icon${Constants.VISUAL_CROSSING_WEATHER_ICON_URL_SUFFIX}"
 }
 
 private fun HourlyForecastResponseV2.toHourlyForecastDataV2() =

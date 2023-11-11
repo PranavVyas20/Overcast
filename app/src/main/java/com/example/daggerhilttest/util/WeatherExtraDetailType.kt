@@ -6,5 +6,5 @@ enum class WeatherExtraDetailType {
     SUNRISE,
     SUNSET,
     WIND_SPEED,
-    WIND_DEGREE
+    VISIBILITY
 }

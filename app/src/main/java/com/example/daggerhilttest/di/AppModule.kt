@@ -28,7 +28,7 @@ object AppModule {
     @Singleton
     fun provideWeatherApi(): WeatherApi {
         return Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
+            .baseUrl(Constants.VISUAL_CROSSING_WEATHER_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(WeatherApi::class.java)
@@ -40,6 +40,7 @@ object AppModule {
         Places.initialize(appContext, BuildConfig.MAPS_API_KEY)
         return Places.createClient(appContext)
     }
+
     @Provides
     @Singleton
     fun provideWeatherRepository(weatherApi: WeatherApi): WeatherRepository {
