@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
                     color = Color.White
                 ) {
                     val savedLatLog = LatLong(savedLat, savedLong)
+                    //test commit
 //                    val state = weatherViewModel.currentWeatherState_v2
 //                    Log.d("current-weather-state", state.value.toString())
 //                    LaunchedEffect(key1 = Unit) {
