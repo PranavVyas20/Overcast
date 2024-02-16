@@ -89,42 +89,11 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
-data class GraphPoints(val temp: Float, val day: String)
-data class GraphPointsV2(val dayyX: Float, val temppY: Float)
-
-fun mapValue(
-    value: Float,
-    fromRangeStart: Float,
-    fromRangeEnd: Float,
-    toRangeStart: Float,
-    toRangeEnd: Float,
-): Float {
-    val fromRange = fromRangeEnd - fromRangeStart
-    val toRange = toRangeEnd - toRangeStart
-
-    val scaledValue = (value - fromRangeStart) / fromRange
-    return toRangeStart + (scaledValue * toRange)
-}
-
 
 @Composable
-@Preview
-fun canvas2() {
-    val list: List<GraphPoints> = remember {
-        listOf(
-            GraphPoints(temp = 33f, "M"),
-            GraphPoints(temp = 32f, "T"),
-            GraphPoints(temp = 29f, "W"),
-            GraphPoints(temp = 30f, "T"),
-            GraphPoints(temp = 0f, "F"),
-            GraphPoints(temp = 0f, "S"),
-            GraphPoints(temp = 29f, "S"),
-        )
-    }
-
+fun canvas2(graphPoints: List<GraphPoints>) {
     val textMeasurer = rememberTextMeasurer()
-    val sortedList = remember { list.sortedByDescending { it.temp } }
-    val listV2 = remember { mutableListOf<GraphPointsV2>() }
+    val sortedList = remember { graphPoints.sortedByDescending { it.temp } }
 
     Box(
         modifier = Modifier
@@ -138,7 +107,8 @@ fun canvas2() {
                 .fillMaxWidth()
         ) {
 
-            val p15 = (size.width * 0.15f)
+            // 7.5 percent of the total available width
+            val p7_5 = (size.width * 0.075f)
             sortedList.forEachIndexed { index, graphPoints ->
                 val y1 = mapValue(
                     value = graphPoints.temp,
@@ -149,48 +119,21 @@ fun canvas2() {
                         it.temp
                     },
                     toRangeStart = 0f,
-                    toRangeEnd = size.height - p15
+                    toRangeEnd = size.height - p7_5
                 )
-//                drawText(
-//                    textMeasurer = textMeasurer,
-//                    text = graphPoints.temp.toString(),
-//                    topLeft = Offset(
-//                        x = 0f,
-//                        y = y1 - textMeasurer.measure(graphPoints.temp.toString()).size.height / 2.5f
-//                    ),
-//                    style = TextStyle(fontSize = 10.sp)
-//                )
+                /*                drawText(
+                                    textMeasurer = textMeasurer,
+                                    text = graphPoints.temp.toString(),
+                                    topLeft = Offset(
+                                        x = 0f,
+                                        y = y1 - textMeasurer.measure(graphPoints.temp.toString()).size.height / 2.5f
+                                    ),
+                                    style = TextStyle(fontSize = 10.sp)
+                                )*/
             }
-            listV2.clear()
-            list.forEachIndexed { index, graphPoints ->
-                val y =
-                    mapValue(
-                        value = graphPoints.temp,
-                        fromRangeStart = sortedList.maxOf {
-                            it.temp
-                        },
-                        fromRangeEnd = sortedList.minOf {
-                            it.temp
-                        },
-                        toRangeStart = 0f,
-                        toRangeEnd = size.height - p15*0.5f
-                    )
-                val x =
-                    mapValue(
-                        value = index.toFloat(),
-                        fromRangeStart = 0f,
-                        fromRangeEnd = sortedList.lastIndex.toFloat(),
-                        toRangeStart = 0f,
-                        toRangeEnd = size.width
-                    )
-                listV2.add(
-                    GraphPointsV2(
-                        dayyX = x,
-                        temppY = y
-                    )
-                )
-            }
-            val path = generateSmoothPath(listV2, size)
+            val rangedGraphPointsList =
+                createRangedList(graphPoints = graphPoints, size = size, factor = p7_5)
+            val path = generateSmoothPath(rangedGraphPointsList, size)
             drawPath(
                 path = path,
                 brush = Brush.verticalGradient(
@@ -206,10 +149,10 @@ fun canvas2() {
                 color = Color.Black,
                 style = Stroke(width = 5f),
             )
-            list.forEachIndexed { index, graphPoints ->
+            graphPoints.forEachIndexed { index, points ->
                 val y =
                     mapValue(
-                        value = graphPoints.temp,
+                        value = points.temp,
                         fromRangeStart = sortedList.maxOf {
                             it.temp
                         },
@@ -217,7 +160,7 @@ fun canvas2() {
                             it.temp
                         },
                         toRangeStart = 0f,
-                        toRangeEnd = size.height - p15
+                        toRangeEnd = size.height - p7_5
                     )
                 val x =
                     mapValue(
@@ -225,10 +168,10 @@ fun canvas2() {
                         fromRangeStart = 0f,
                         fromRangeEnd = sortedList.lastIndex.toFloat(),
                         toRangeStart = if (index == 0) 0f + textMeasurer.measure(
-                            graphPoints.temp.toInt().toString()
+                            points.temp.toInt().toString()
                         ).size.width / 2f else 0f,
-                        toRangeEnd = if (index == list.lastIndex) size.width - textMeasurer.measure(
-                            graphPoints.temp.toInt().toString()
+                        toRangeEnd = if (index == graphPoints.lastIndex) size.width - textMeasurer.measure(
+                            points.temp.toInt().toString()
                         ).size.width / 2f else size.width
                     )
                 // drawing temp values above circles
@@ -242,26 +185,26 @@ fun canvas2() {
                     start = Offset(x, y),
                     end = Offset(
                         x = x,
-                        y = size.height - textMeasurer.measure(graphPoints.day).size.height
+                        y = size.height - textMeasurer.measure(points.day).size.height
                     ),
                     pathEffect = PathEffect.dashPathEffect(intervals = floatArrayOf(10f, 10f))
                 )
                 drawText(
                     textMeasurer = textMeasurer,
-                    text = graphPoints.temp.toInt().toString(),
+                    text = points.temp.toInt().toString(),
                     topLeft = Offset(
                         x - textMeasurer.measure(
-                            graphPoints.temp.toInt().toString()
+                            points.temp.toInt().toString()
                         ).size.width / 3.0f,
-                        y - textMeasurer.measure(graphPoints.temp.toInt().toString()).size.height
+                        y - textMeasurer.measure(points.temp.toInt().toString()).size.height
                     ),
                     style = TextStyle(fontSize = 10.sp, color = Color.Black)
                 )
                 drawText(
                     textMeasurer = textMeasurer,
-                    text = graphPoints.day,
+                    text = points.day,
                     topLeft = Offset(
-                        x = x - textMeasurer.measure(graphPoints.day).size.width / 2.6f,
+                        x = x - textMeasurer.measure(points.day).size.width / 2.6f,
                         y = size.height - size.height * 0.1f
                     ),
                     style = TextStyle(fontSize = 10.sp)
@@ -271,6 +214,22 @@ fun canvas2() {
     }
 }
 
+@Composable
+@Preview
+fun CustomGraphPreview() {
+    val list: List<GraphPoints> = remember {
+        listOf(
+            GraphPoints(temp = 33f, "M"),
+            GraphPoints(temp = 32f, "T"),
+            GraphPoints(temp = 29f, "W"),
+            GraphPoints(temp = 30f, "T"),
+            GraphPoints(temp = 31f, "F"),
+            GraphPoints(temp = 29f, "S"),
+            GraphPoints(temp = 30f, "S"),
+        )
+    }
+    canvas2(graphPoints = list)
+}
 private fun generateSmoothPath(list: List<GraphPointsV2>, size: Size): Path {
     val path = Path()
     var prevX = list[0].dayyX
@@ -293,3 +252,56 @@ private fun generateSmoothPath(list: List<GraphPointsV2>, size: Size): Path {
     path.close()
     return path
 }
+
+data class GraphPoints(val temp: Float, val day: String)
+
+// Graph points range mapped to canvas size
+data class GraphPointsV2(val dayyX: Float, val temppY: Float)
+
+fun mapValue(
+    value: Float,
+    fromRangeStart: Float,
+    fromRangeEnd: Float,
+    toRangeStart: Float,
+    toRangeEnd: Float,
+): Float {
+    val fromRange = fromRangeEnd - fromRangeStart
+    val toRange = toRangeEnd - toRangeStart
+
+    val scaledValue = (value - fromRangeStart) / fromRange
+    return toRangeStart + (scaledValue * toRange)
+}
+
+fun createRangedList(
+    graphPoints: List<GraphPoints>,
+    size: Size,
+    factor: Float
+): List<GraphPointsV2> {
+    return graphPoints.mapIndexed { index, points ->
+        val y =
+            mapValue(
+                value = points.temp,
+                fromRangeStart = graphPoints.maxOf {
+                    it.temp
+                },
+                fromRangeEnd = graphPoints.minOf {
+                    it.temp
+                },
+                toRangeStart = 0f,
+                toRangeEnd = size.height - factor
+            )
+        val x =
+            mapValue(
+                value = index.toFloat(),
+                fromRangeStart = 0f,
+                fromRangeEnd = graphPoints.lastIndex.toFloat(),
+                toRangeStart = 0f,
+                toRangeEnd = size.width
+            )
+        GraphPointsV2(
+            dayyX = x,
+            temppY = y
+        )
+    }
+}
+
