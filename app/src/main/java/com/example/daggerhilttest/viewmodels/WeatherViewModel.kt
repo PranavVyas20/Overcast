@@ -266,7 +266,6 @@ class WeatherViewModel @Inject constructor(
 
                     is Resource_v2.Loading -> {
                         currentWeatherStateV3.value = UIState.Loading()
-
                     }
 
                     is Resource_v2.Success -> {

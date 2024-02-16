@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/LocationSplashFragment">
+
+    <fragment
+        android:id="@+id/LocationSplashFragment"
+        android:name="com.example.daggerhilttest.activities.LocationSplashFragment"
+        android:label="@string/first_fragment_label"
+        tools:layout="@layout/fragment_splash_location">
+
+        <action
+            android:id="@+id/action_FirstFragment_to_SecondFragment"
+            app:destination="@id/CurrentWeatherFragment"
+            app:launchSingleTop="false"
+            app:popUpTo="@id/CurrentWeatherFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/CurrentWeatherFragment"
+        android:name="com.example.daggerhilttest.activities.CurrentWeatherFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_current_weather"/>
+</navigation>

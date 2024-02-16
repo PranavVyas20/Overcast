@@ -1,0 +1,73 @@
+{
+  ConstraintSets: {
+    start: {
+      bg_image: {
+        top: ['parent', 'top'],
+        start: ['parent', 'start'],
+        end: ['parent', 'end']
+      },
+      searchbar: {
+        top: ['parent', 'top', 12],
+      },
+      tempTextField: {
+        top: ['searchbar', 'bottom', 0],
+        start: ['parent', 'start', 12],
+        bottom: ['timeTextField', 'top', 0],
+      },
+      feelsLikeTextField: {
+        bottom: ['bg_image', 'bottom', 12],
+        end: ['parent', 'end', 18],
+      },
+      timeTextField: {
+        bottom: ['bg_image', 'bottom', 12],
+        start: ['parent', 'start', 18]
+      },
+      weatherIcon: {
+        bottom: ['tempTextField', 'bottom', 0],
+        end: ['parent', 'end', 18],
+      },
+      weatherDetailsListView: {
+        height: 'spread',
+        top: ['bg_image', 'bottom', 12],
+        start: ['parent', 'start', 0],
+        end: ['parent', 'end', 0]
+      }
+    },
+    end: {
+      bg_image: {
+        height: 170,
+        width: 'parent',
+        top: ['parent', 'top'],
+        start: ['parent', 'start'],
+        end: ['parent', 'end']
+      },
+      searchbar: {
+        top: ['parent', 'top', 12],
+      },
+      tempTextField: {
+        top: ['searchbar', 'bottom', 12],
+        start: ['parent', 'start', 12],
+      },
+      feelsLikeTextField: {
+        visibility: 'gone',
+        bottom: ['bg_image', 'bottom', 12],
+        end: ['parent', 'end', 18],
+      },
+      timeTextField: {
+        visibility: 'gone',
+        bottom: ['bg_image', 'bottom', 12],
+        start: ['parent', 'start', 18]
+      },
+      weatherIcon: {
+        bottom: ['tempTextField', 'bottom', 0],
+        end: ['parent', 'end', 18],
+      },
+      weatherDetailsListView: {
+        height: 'spread',
+        top: ['bg_image', 'bottom', 12],
+        start: ['parent', 'start', 0],
+        end: ['parent', 'end', 0]
+      }
+    }
+  }
+}

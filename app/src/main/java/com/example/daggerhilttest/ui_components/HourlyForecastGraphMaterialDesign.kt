@@ -1,4 +1,4 @@
-package com.example.daggerhilttest.screens
+package com.example.daggerhilttest.ui_components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,7 +26,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.daggerhilttest.models.v2.WeatherForecastData
 import com.example.daggerhilttest.ui.theme.darkPurpleColor
 import com.example.daggerhilttest.ui.theme.productSans
-import com.example.daggerhilttest.ui.theme.purpleBgColor
 import com.patrykandpatryk.vico.compose.axis.horizontal.bottomAxis
 import com.patrykandpatryk.vico.compose.axis.vertical.startAxis
 import com.patrykandpatryk.vico.compose.chart.Chart
@@ -37,7 +36,6 @@ import com.patrykandpatryk.vico.compose.component.shape.textComponent
 import com.patrykandpatryk.vico.core.axis.AxisPosition
 import com.patrykandpatryk.vico.core.axis.formatter.AxisValueFormatter
 import com.patrykandpatryk.vico.core.component.shape.LineComponent
-import com.patrykandpatryk.vico.core.component.text.TextComponent
 import com.patrykandpatryk.vico.core.dimensions.MutableDimensions
 import com.patrykandpatryk.vico.core.entry.FloatEntry
 import com.patrykandpatryk.vico.core.entry.entryModelOf
@@ -204,5 +202,10 @@ fun GraphPreview() {
         )
         HourlyGraph(modifier = Modifier, list)
     }
+}
+
+@Composable
+fun HourlyForecastGraphMaterialDesignV2() {
+
 }
 

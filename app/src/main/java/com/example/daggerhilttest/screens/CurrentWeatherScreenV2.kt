@@ -34,6 +34,8 @@ import com.example.daggerhilttest.models.PlaceSuggestion
 import com.example.daggerhilttest.models.v2.GeocodingDataV2
 import com.example.daggerhilttest.models.v2.WeatherDataV2
 import com.example.daggerhilttest.models.v2.toGeocodingData
+import com.example.daggerhilttest.ui.theme.darkPurpleColor
+import com.example.daggerhilttest.ui.theme.purpleBgColor2
 import com.example.daggerhilttest.ui_components.NetworkErrorLayout
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
 
@@ -118,6 +120,7 @@ fun CurrentWeatherScreenContent(
         },
         frontLayerContent = {
             CurrentWeatherScreenBottomSheetContent(
+                modifier = Modifier.background(color = purpleBgColor2),
                 currentWeather = currentWeatherData.currentWeather,
                 hourlyForecast = currentWeatherData.weatherForecast.first().hourlyForecastData,
                 dayForecast = currentWeatherData.weatherForecast

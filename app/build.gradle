@@ -7,21 +7,13 @@ plugins {
 }
 
 android {
-    signingConfigs {
-        release {
-            storeFile file(compose_ui_version)
-            storePassword 'weatherb'
-            keyAlias 'weatherb'
-            keyPassword 'weatherb'
-        }
-    }
     namespace 'com.example.daggerhilttest'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.daggerhilttest"
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -30,7 +22,7 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
-        signingConfig signingConfigs.release
+        signingConfig signingConfigs.debug
     }
 
     buildTypes {
@@ -48,6 +40,7 @@ android {
     }
     buildFeatures {
         compose true
+        viewBinding true
         android.buildFeatures.buildConfig true
     }
     composeOptions {
@@ -61,18 +54,19 @@ android {
 }
 
 dependencies {
-
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
-    implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation 'androidx.activity:activity-compose:1.8.2'
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
-    implementation 'androidx.compose.material:material:1.4.3'
+    implementation 'androidx.compose.material:material:1.5.4'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'co.yml:ycharts:1.0.0'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.6.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.6.0'
 //    implementation 'com.google.android.material:material:1.6.1'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -80,7 +74,7 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
-    implementation "androidx.compose.material:material-icons-extended:1.4.3"
+    implementation "androidx.compose.material:material-icons-extended:1.5.4"
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation("com.google.code.gson:gson:2.9.0")
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
@@ -126,7 +120,10 @@ dependencies {
     implementation 'com.shamanland:xdroid-toaster:0.0.10'
 
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
-    implementation "androidx.compose.runtime:runtime-tracing:1.0.0-alpha03"
+    implementation "androidx.compose.runtime:runtime-tracing:1.0.0-beta01"
+
+    implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
+    implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
 
 
 }

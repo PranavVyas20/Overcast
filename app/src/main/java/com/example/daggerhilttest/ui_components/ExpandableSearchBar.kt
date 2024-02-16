@@ -194,7 +194,8 @@ fun ExpandableSearchBarPreview() {
             onLocationSuggestionItemClick = {},
             placeSuggestions = mutableListOf(),
             locationName = "Jaipur",
-            showLocationSuggestionsView = remember { mutableStateOf(value = false) })
+            showLocationSuggestionsView = remember { mutableStateOf(value = false) }
+        )
     }
 }
 
@@ -271,7 +272,7 @@ fun SearchBarV2(
         )
 
 
-        TextField(value = searchQuery.value, onValueChange = {
+        TextField(value = searchQuery.value, maxLines = 1, onValueChange = {
             onTextQueryChanged(it)
             searchQuery.value = it
         }, placeholder = { Text(placeHolderText.value) }, trailingIcon = {
