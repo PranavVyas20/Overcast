@@ -4,13 +4,22 @@ import android.graphics.PointF
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -18,8 +27,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.Gray
-import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -30,20 +37,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.daggerhilttest.screens.purpleColor
-import com.example.daggerhilttest.ui.theme.grayLineColor
+import com.example.daggerhilttest.ui.theme.productSans
 
 @OptIn(ExperimentalTextApi::class)
 @Composable
 fun CurrentWeatherGraphV2(graphPoints: List<GraphPoints>, showPoints: Boolean = false) {
     val textMeasurer = rememberTextMeasurer()
-    val sortedList = remember { graphPoints.sortedBy { it.temp } }
-
-    Box(
+    Column(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(purpleColor)
-            .padding(top = 10.dp, bottom = 10.dp)
+            .padding(10.dp)
     ) {
+        Row {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .height(28.dp)
+                    .width(28.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .height(16.dp)
+                        .width(16.dp),
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = "hourly_forecast_icon"
+                )
+            }
+            Text(
+                text = "Day Forecast",
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 8.dp),
+                fontFamily = productSans,
+                fontSize = 14.sp
+            )
+        }
         Canvas(
             modifier = Modifier
                 .height(180.dp)
@@ -53,180 +84,83 @@ fun CurrentWeatherGraphV2(graphPoints: List<GraphPoints>, showPoints: Boolean = 
             // 7.5 percent of the total available width
             val p7_5_width = size.width * 0.075f
             // 10 percent of the total available height
-            val p10_height = size.height * 0.1f
+            val p12_height = size.height * 0.12f
 
-            val rangedGraphPointsList =
-                createRangedList(
-                    graphPoints = graphPoints,
-                    size = size,
-                    heightFactor = p10_height,
-                    widthFactor = p7_5_width
-                )
+            val rangedGraphPointsList = createRangedList(
+                graphPoints = graphPoints,
+                size = size,
+                heightFactor = p12_height,
+                widthFactor = p7_5_width
+            )
             val path = generateSmoothPath(rangedGraphPointsList, size)
             drawPath(
                 path = path,
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFFB7A5DF),
-                        Color(0xFFE0D4F8)
+                        Color(0xFFB7A5DF), Color(0xFFE0D4F8)
                     )
                 ),
                 style = Fill,
             )
             drawPath(
                 path = path,
-                color = Black,
-                style = Stroke(width = 2f),
+                color = Black.copy(alpha = 0.3f),
+                style = Stroke(width = 4f),
             )
             rangedGraphPointsList.forEachIndexed { index, graphPointsV2 ->
-                if (showPoints)
+                if (showPoints) {
                     drawCircle(
-                        color = Black,
-                        radius = 9f,
-                        center = Offset(
-                            x = if (index == 0) {
-                                graphPointsV2.dayyX + 12f
-                            } else if (index == 6) {
-                                graphPointsV2.dayyX - 12f
-                            } else {
-                                graphPointsV2.dayyX
-                            },
-                            y = graphPointsV2.temppY
+                        color = Black.copy(alpha = 0.6f), radius = 7f, center = Offset(
+                            x = when (index) {
+                                0 -> graphPointsV2.dayyX + 10f
+                                6 -> graphPointsV2.dayyX - 10f
+                                else -> graphPointsV2.dayyX
+                            }, y = graphPointsV2.temppY
                         )
-                    )
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = graphPoints[index].day,
-                    topLeft = Offset(
-                        x = if (index == 0) {
-                            graphPointsV2.dayyX + 20f - textMeasurer.measure(graphPoints[index].day).size.width / 3f
-                        } else if (index == 6) {
-                            graphPointsV2.dayyX - 24f - textMeasurer.measure(graphPoints[index].day).size.width / 3f
-                        } else {
-                            graphPointsV2.dayyX - textMeasurer.measure(graphPoints[index].day).size.width / 3f
-                        },
-                        y = size.height - 30
-                    ),
-                    style = TextStyle(fontSize = 10.sp)
-                )
-            }
-            sortedList.forEachIndexed { index, points ->
-                val y =
-                    mapValue(
-                        value = points.temp,
-                        fromRangeStart = sortedList.maxOf {
-                            it.temp
-                        },
-                        fromRangeEnd = sortedList.minOf {
-                            it.temp
-                        },
-                        toRangeStart = 0f,
-                        toRangeEnd = size.height - p10_height - 20f
-                    )
-                val x =
-                    mapValue(
-                        value = index.toFloat(),
-                        fromRangeStart = 0f,
-                        fromRangeEnd = sortedList.lastIndex.toFloat(),
-                        toRangeStart = 100f,
-                        toRangeEnd = size.width - 100f
-                    )
-
-                if (index == 0 || index == 6) {
-                    if(index == 6)
-                    drawLine(
-                        color = Gray,
-                        strokeWidth = 4f,
-                        start = Offset(
-                            x = 100f,
-                            y = y + textMeasurer.measure(
-                                points.temp.toInt().toString()
-                            ).size.height / 2f
-                        ),
-                        end = Offset(
-                            x = size.width, y = y + textMeasurer.measure(
-                                points.temp.toInt().toString()
-                            ).size.height / 2f
-                        )
-                    )
-                    drawText(
-                        textMeasurer = textMeasurer,
-                        text = "${points.temp.toInt()} °C",
-                        topLeft = Offset(20f, y),
-                        style = TextStyle(fontSize = 10.sp)
                     )
                 }
-                /*drawLine(
-                    color = Color.Black,
-                    start = Offset(x, y),
-                    end = Offset(
-                        x = x,
-                        y = size.height - textMeasurer.measure(points.day).size.height
-                    ),
-                    pathEffect = PathEffect.dashPathEffect(intervals = floatArrayOf(10f, 10f))
-                )
                 drawText(
                     textMeasurer = textMeasurer,
-                    text = points.temp.toInt().toString(),
+                    text = "${graphPoints[index].temp.toInt()}°",
+                    style = TextStyle(fontSize = 11.sp, fontFamily = productSans),
                     topLeft = Offset(
-                        x - textMeasurer.measure(
-                            points.temp.toInt().toString()
-                        ).size.width / 3.0f,
-                        y - textMeasurer.measure(points.temp.toInt().toString()).size.height
-                    ),
-                    style = TextStyle(fontSize = 10.sp, color = Color.Black)
-                )*/
-            }
-            val midTemp = (sortedList.maxOf { it.temp } + sortedList.minOf { it.temp }) / 2
-            val maxY = mapValue(
-                value = sortedList[6].temp,
-                fromRangeStart = sortedList.maxOf {
-                    it.temp
-                },
-                fromRangeEnd = sortedList.minOf {
-                    it.temp
-                },
-                toRangeStart = 0f,
-                toRangeEnd = size.height - p10_height - 20f
-            )
-            val minY = mapValue(
-                value = sortedList[0].temp,
-                fromRangeStart = sortedList.maxOf {
-                    it.temp
-                },
-                fromRangeEnd = sortedList.minOf {
-                    it.temp
-                },
-                toRangeStart = 0f,
-                toRangeEnd = size.height - p10_height - 20f
-            )
-            val midY = (maxY + minY) / 2
-
-            drawLine(
-                color = Gray,
-                strokeWidth = 4f,
-                start = Offset(
-                    x = 100f,
-                    y = midY + textMeasurer.measure(
-                        midTemp.toInt().toString()
-                    ).size.height / 2f
-                ),
-                end = Offset(
-                    x = size.width, y = midY + textMeasurer.measure(
-                        midTemp.toInt().toString()
-                    ).size.height / 2f
+                        x = when (index) {
+                            0 -> graphPointsV2.dayyX + 4f
+                            6 -> graphPointsV2.dayyX - 50f
+                            else -> graphPointsV2.dayyX - textMeasurer.measure(
+                                graphPoints[index].temp.toInt().toString()
+                            ).size.width / 2.7f
+                        }, y = graphPointsV2.temppY - textMeasurer.measure(
+                            graphPoints[index].temp.toInt().toString()
+                        ).size.height / 1.3f
+                    )
                 )
-            )
-            drawText(
-                textMeasurer = textMeasurer,
-                text = "${midTemp.toInt()} °C",
-                topLeft = Offset(20f, midY),
-                style = TextStyle(fontSize = 10.sp)
+                drawText(
+                    textMeasurer = textMeasurer, text = graphPoints[index].day, topLeft = Offset(
+                        x = when (index) {
+                            0 -> graphPointsV2.dayyX
+                            6 -> graphPointsV2.dayyX - 55f
+                            else -> graphPointsV2.dayyX - textMeasurer.measure(graphPoints[index].day).size.width / 3f
+                        }, y = size.height - 30
+                    ), style = TextStyle(fontSize = 11.sp, fontFamily = productSans)
+                )
+            }
+            drawLine(
+                color = purpleColor,
+                start = Offset(0f, 0f),
+                end = Offset(0f, size.height),
+                strokeWidth = 5f
             )
             drawLine(
                 color = purpleColor,
-                start = Offset(100f, size.height - 40),
-                end = Offset(100f, 0f),
+                start = Offset(size.width, 0f),
+                end = Offset(size.width, size.height),
+                strokeWidth = 5f
+            )
+            drawLine(
+                color = purpleColor,
+                start = Offset(0f, size.height - 40),
+                end = Offset(size.width, size.height - 40),
                 strokeWidth = 5f
             )
         }
@@ -267,8 +201,8 @@ private fun generateSmoothPath(list: List<GraphPointsV2>, size: Size): Path {
         prevY = tempY
     }
 
-    path.lineTo(size.width , size.height - 40)
-    path.lineTo(100f, size.height - 40)
+    path.lineTo(size.width, size.height - 40)
+    path.lineTo(0f, size.height - 40)
     path.close()
     return path
 }
@@ -293,38 +227,30 @@ fun mapValue(
 }
 
 fun createRangedList(
-    graphPoints: List<GraphPoints>,
-    size: Size,
-    widthFactor: Float,
-    heightFactor: Float
+    graphPoints: List<GraphPoints>, size: Size, widthFactor: Float, heightFactor: Float
 ): List<GraphPointsV2> {
     return graphPoints.mapIndexed { index, points ->
-        val y =
-            mapValue(
-                value = points.temp,
-                fromRangeStart = graphPoints.maxOf {
-                    it.temp
-                },
-                fromRangeEnd = graphPoints.minOf {
-                    it.temp
-                },
-                toRangeStart = 0f,
-                // subtracting the height factor will prevent the curve touching the bottom of the graph
-                toRangeEnd = size.height - heightFactor
-            )
-        val x =
-            mapValue(
-                value = index.toFloat(),
-                fromRangeStart = 0f,
-                fromRangeEnd = graphPoints.lastIndex.toFloat(),
-                // basically giving the spacing between canvas start and curve
-                toRangeStart = 0f + 100f,
-                // basically giving the spacing between canvas end and curve
-                toRangeEnd = size.width
-            )
+        val y = mapValue(value = points.temp, fromRangeStart = graphPoints.maxOf {
+            it.temp
+        }, fromRangeEnd = graphPoints.minOf {
+            it.temp
+        },
+            // Basically the max point in the graph will be at this min height from (0.0) from top
+            toRangeStart = 30f,
+            // subtracting the height factor will prevent the curve touching the bottom of the graph
+            toRangeEnd = size.height - heightFactor
+        )
+        val x = mapValue(
+            value = index.toFloat(),
+            fromRangeStart = 0f,
+            fromRangeEnd = graphPoints.lastIndex.toFloat(),
+            // basically giving the spacing between canvas start and curve
+            toRangeStart = 0f,
+            // basically giving the spacing between canvas end and curve
+            toRangeEnd = size.width
+        )
         GraphPointsV2(
-            dayyX = x,
-            temppY = y
+            dayyX = x, temppY = y
         )
     }
 }

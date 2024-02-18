@@ -29,11 +29,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.isPopupLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.daggerhilttest.models.PlaceSuggestion
 import com.example.daggerhilttest.models.v2.GeocodingDataV2
 import com.example.daggerhilttest.models.v2.WeatherDataV2
 import com.example.daggerhilttest.models.v2.toGeocodingData
+import com.example.daggerhilttest.ui.theme.purpleBgColor
 import com.example.daggerhilttest.ui_components.NetworkErrorLayout
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
 
@@ -99,6 +101,7 @@ fun CurrentWeatherScreenContent(
     val scaffoldState = rememberBackdropScaffoldState(initialValue = BackdropValue.Revealed)
     BackdropScaffold(
         frontLayerScrimColor = Color.Unspecified,
+        frontLayerBackgroundColor = purpleBgColor,
         appBar = {},
         backLayerBackgroundColor = Color(0xFF101e37),
         scaffoldState = scaffoldState,

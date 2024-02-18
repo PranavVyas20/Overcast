@@ -1,6 +1,6 @@
 package com.example.daggerhilttest.screens
 
-import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,9 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,20 +28,10 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.HistoryToggleOff
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.DockedSearchBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.SearchBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,23 +39,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Popup
-import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.constraintlayout.widget.Barrier
 import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
@@ -81,10 +62,10 @@ import com.example.daggerhilttest.models.v2.WeatherForecastData
 import com.example.daggerhilttest.ui.theme.productSans
 import com.example.daggerhilttest.ui.theme.purpleBgColor
 import com.example.daggerhilttest.ui.theme.purpleWeatherItemColor
+import com.example.daggerhilttest.ui_components.CurrentWeatherGraphV2
+import com.example.daggerhilttest.ui_components.GraphPoints
 import com.example.daggerhilttest.ui_components.SearchBarV2
-import com.example.daggerhilttest.ui_components.SearchSuggestionView
 import com.example.daggerhilttest.util.WeatherExtraDetailType
-
 
 val purpleColor = Color(0xFFEBDEFF)
 
@@ -95,7 +76,9 @@ fun CurrentWeatherScreenBottomSheetContent(
     dayForecast: List<WeatherForecastData>
 ) {
     LazyColumn(
-        modifier = Modifier.background(color = purpleBgColor)
+        modifier = Modifier.background(color = purpleBgColor),
+        contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
             ButtonsLayout()
@@ -103,37 +86,37 @@ fun CurrentWeatherScreenBottomSheetContent(
         item {
             WeatherDetailsGridView(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp),
+                    .fillMaxWidth(),
                 noOfItemsInRow = 2,
                 weatherDetailItems = currentWeather.weatherDetailItems
             )
         }
 
-
         item {
             HourlyForecastView(
-                hourlyForecast = hourlyForecast,
-                paddingValues = PaddingValues(
-                    top = 16.dp, start = 16.dp, end = 16.dp
-                )
+                hourlyForecast = hourlyForecast
             )
 
         }
         item {
-            HourlyForecastGraph(
-                paddingValues = PaddingValues(
-                    top = 16.dp, start = 16.dp, end = 16.dp
-                ),
-                dayForecast = dayForecast
-            )
-
+            Log.d("column_tag", dayForecast.size.toString())
+            val list: List<GraphPoints> = remember {
+                listOf(
+                    GraphPoints(temp = 33f, "Mon"),
+                    GraphPoints(temp = 32f, "Tue"),
+                    GraphPoints(temp = 29f, "Wed"),
+                    GraphPoints(temp = 30f, "Thu"),
+                    GraphPoints(temp = 32f, "Fri"),
+                    GraphPoints(temp = 28f, "Sat"),
+                    GraphPoints(temp = 34f, "Sun"),
+                )
+            }
+            CurrentWeatherGraphV2(graphPoints = list)
         }
         item {
             WeatherDetailsGridView(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                    .fillMaxWidth(),
                 noOfItemsInRow = 2,
                 weatherDetailItems = currentWeather.sunsetSunriseWeatherItems
             )
@@ -440,9 +423,7 @@ fun ButtonsLayout() {
 
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 18.dp)
-            .padding(top = 12.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         PrimaryButton(
@@ -495,13 +476,11 @@ fun HourlyForecastItemView(hourlyForecast: HourlyForecastDataV2) {
 
 @Composable
 fun HourlyForecastView(
-    paddingValues: PaddingValues,
     hourlyForecast: List<HourlyForecastDataV2>
 ) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(paddingValues)
             .clip(RoundedCornerShape(18.dp))
             .background(color = purpleWeatherItemColor)
     ) {
@@ -687,8 +666,7 @@ fun WeatherExtraDetailItemPreview() {
 fun WeatherDetailsGridViewPreview() {
     WeatherDetailsGridView(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+            .fillMaxWidth(),
         noOfItemsInRow = 2,
         weatherDetailItems = listOf(
             WeatherExtraDetailItem(
