@@ -75,6 +75,13 @@ private fun convertTo12HourFormat(
     return "$hours12Format:$minutes $amOrPm"
 }
 
+fun epochSecondsToDayString(epochSeconds: Long): String {
+    val instant = Instant.ofEpochSecond(epochSeconds)
+    val zoneId = ZoneId.systemDefault()
+    val dateTimeFormatter = DateTimeFormatter.ofPattern("EEEE")
+    return instant.atZone(zoneId).format(dateTimeFormatter).take(3)
+}
+
 fun convertEpochTimeToFormattedDateTime(epochSeconds: Long): String {
     val sdf = SimpleDateFormat("MMMM dd, h:mm a", Locale.ENGLISH)
     val date = Date(epochSeconds * 1000)
@@ -113,6 +120,16 @@ private fun CurrentWeatherResponseV2.toWeatherForecastData() =
         day = dateTimeEpoch?.let { epochSecondsToDayString(it) } ?: ""
     )
 
+private fun CurrentWeatherResponseV2.toGraphPoints() = GraphPoints(
+    temp = temperature?.let { convertTempToCelsius(it) } ?: 0f,
+    day = dateTimeEpoch?.let { epochSecondsToDayString(it) } ?: ""
+)
+
+fun List<CurrentWeatherResponseV2>.toGraphPointsList() : List<GraphPoints> {
+    return this.map {
+        it.toGraphPoints()
+    }
+}
 fun List<CurrentWeatherResponseV2>.toWeatherForecastListData(): List<WeatherForecastData> {
     return this.map {
         it.toWeatherForecastData()
