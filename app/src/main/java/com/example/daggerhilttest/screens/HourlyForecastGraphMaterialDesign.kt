@@ -26,7 +26,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.daggerhilttest.models.v2.WeatherForecastData
 import com.example.daggerhilttest.ui.theme.darkPurpleColor
 import com.example.daggerhilttest.ui.theme.productSans
-import com.example.daggerhilttest.ui.theme.purpleBgColor
 import com.patrykandpatryk.vico.compose.axis.horizontal.bottomAxis
 import com.patrykandpatryk.vico.compose.axis.vertical.startAxis
 import com.patrykandpatryk.vico.compose.chart.Chart
@@ -37,7 +36,6 @@ import com.patrykandpatryk.vico.compose.component.shape.textComponent
 import com.patrykandpatryk.vico.core.axis.AxisPosition
 import com.patrykandpatryk.vico.core.axis.formatter.AxisValueFormatter
 import com.patrykandpatryk.vico.core.component.shape.LineComponent
-import com.patrykandpatryk.vico.core.component.text.TextComponent
 import com.patrykandpatryk.vico.core.dimensions.MutableDimensions
 import com.patrykandpatryk.vico.core.entry.FloatEntry
 import com.patrykandpatryk.vico.core.entry.entryModelOf
@@ -154,52 +152,60 @@ fun GraphPreview() {
     Surface {
         val list = listOf<WeatherForecastData>(
             WeatherForecastData(
-                temp = 28.0,
-                minTemp = 0.0,
-                maxTemp = 0.0,
+                temp = 28f,
+                minTemp = 0f,
+                maxTemp = 0f,
                 hourlyForecastData = listOf(),
                 icon = "",
-                dateTime = ""
+                dateTime = "",
+                day = "Mon"
             ),
             WeatherForecastData(
-                temp = 29.0,
-                minTemp = 0.0,
-                maxTemp = 0.0,
+                temp = 29f,
+                minTemp = 0f,
+                maxTemp = 0f,
                 hourlyForecastData = listOf(),
                 icon = "",
-                dateTime = ""
+                dateTime = "",
+                day = "Tue"
+
             ),
             WeatherForecastData(
-                temp = 30.0,
-                minTemp = 0.0,
-                maxTemp = 0.0,
+                temp = 30f,
+                minTemp = 0f,
+                maxTemp = 0f,
                 hourlyForecastData = listOf(),
                 icon = "",
-                dateTime = ""
+                dateTime = "",
+                day = "Wed"
             ),
             WeatherForecastData(
-                temp = 28.0,
-                minTemp = 0.0,
-                maxTemp = 0.0,
+                temp = 28f,
+                minTemp = 0f,
+                maxTemp = 0f,
                 hourlyForecastData = listOf(),
                 icon = "",
-                dateTime = ""
+                dateTime = "",
+                day = "Thu"
+
             ),
             WeatherForecastData(
-                temp = 29.0,
-                minTemp = 0.0,
-                maxTemp = 0.0,
+                temp = 29f,
+                minTemp = 0f,
+                maxTemp = 0f,
                 hourlyForecastData = listOf(),
                 icon = "",
-                dateTime = ""
+                dateTime = "",
+                day = "Fri"
             ),
             WeatherForecastData(
-                temp = 28.0,
-                minTemp = 0.0,
-                maxTemp = 0.0,
+                temp = 28f,
+                minTemp = 0f,
+                maxTemp = 0f,
                 hourlyForecastData = listOf(),
                 icon = "",
-                dateTime = ""
+                dateTime = "",
+                day = "Sat"
             ),
         )
         HourlyGraph(modifier = Modifier, list)

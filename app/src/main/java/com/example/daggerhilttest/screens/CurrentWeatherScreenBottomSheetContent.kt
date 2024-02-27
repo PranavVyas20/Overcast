@@ -127,10 +127,10 @@ fun CurrentWeatherScreenBottomSheetContent(
 @Composable
 fun BottomSheetScaffoldContent(
     location: String,
-    temp: Double,
+    temp: Float,
     icon: String,
     time: String,
-    feelsLikeTemp: Double,
+    feelsLikeTemp: Float,
     weatherCondition: String,
     placesSuggestions: List<PlaceSuggestion>,
     getAutoCompleteSuggestion: (String) -> Unit,

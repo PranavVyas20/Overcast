@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class HourlyForecastResponseV2(
     @SerializedName("temp")
-    val temp: Double?,
+    val temp: Float?,
     @SerializedName("datetimeEpoch")
     val dateTimeEpoch: Long?,
     @SerializedName("icon")

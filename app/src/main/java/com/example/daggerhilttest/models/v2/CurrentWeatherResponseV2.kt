@@ -12,6 +12,9 @@ import com.example.daggerhilttest.models.v1.WeatherExtraDetailItem
 import com.example.daggerhilttest.util.WeatherExtraDetailType
 import com.google.gson.annotations.SerializedName
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -24,23 +27,23 @@ data class CurrentWeatherResponseV2(
     @SerializedName("hours")
     val hours: List<HourlyForecastResponseV2>?,
     @SerializedName("temp")
-    val temperature: Double?,
+    val temperature: Float?,
     @SerializedName("tempmin")
-    val tempMin: Double?,
+    val tempMin: Float?,
     @SerializedName("tempmax")
-    val tempMax: Double?,
+    val tempMax: Float?,
     @SerializedName("feelslike")
-    val feelsLikeTemp: Double?,
+    val feelsLikeTemp: Float?,
     @SerializedName("humidity")
-    val humidity: Double?,
+    val humidity: Float?,
     @SerializedName("windspeed")
-    val windSpeed: Double?,
+    val windSpeed: Float?,
     @SerializedName("pressure")
-    val pressure: Double?,
+    val pressure: Float?,
     @SerializedName("uvindex")
-    val uvIndex: Double?,
+    val uvIndex: Float?,
     @SerializedName("visibility")
-    val visibility: Double?,
+    val visibility: Float?,
     @SerializedName("icon")
     val icon: String?,
     @SerializedName("conditions")
@@ -51,9 +54,9 @@ data class CurrentWeatherResponseV2(
     val sunset: String?,
 )
 
-private fun convertTempToCelsius(kFarenheit: Double): Double {
+private fun convertTempToCelsius(kFarenheit: Float): Float {
     val cel = ((kFarenheit - 32) * 5) / 9
-    return (cel * 10.0).roundToInt() / 10.0
+    return (cel * 10.0).roundToInt() / 10.0.toFloat()
 }
 
 private fun convertTo12HourFormat(
@@ -90,22 +93,24 @@ private fun getIconUrl(icon: String): String {
 
 private fun HourlyForecastResponseV2.toHourlyForecastDataV2() =
     HourlyForecastDataV2(
-        temp = temp?.let { convertTempToCelsius(it)} ?:0.0,
-        formattedTime = dateTimeEpoch?.let { convertEpochToFormattedTime(it) } ?:"na",
+        temp = temp?.let { convertTempToCelsius(it) } ?: 0f,
+        formattedTime = dateTimeEpoch?.let { convertEpochToFormattedTime(it) } ?: "na",
         icon = icon?.let { getIconUrl(it) } ?: ""
     )
 
 private fun List<HourlyForecastResponseV2>.toHourlyForecastListData(): List<HourlyForecastDataV2> {
     return this.map { it.toHourlyForecastDataV2() }
 }
+
 private fun CurrentWeatherResponseV2.toWeatherForecastData() =
     WeatherForecastData(
-        temp = temperature?.let { convertTempToCelsius(it) } ?: 0.0,
-        minTemp = tempMin?.let { convertTempToCelsius(it) } ?: 0.0,
-        maxTemp = tempMax?.let { convertTempToCelsius(it) } ?: 0.0,
+        temp = temperature?.let { convertTempToCelsius(it) } ?: 0f,
+        minTemp = tempMin?.let { convertTempToCelsius(it) } ?: 0f,
+        maxTemp = tempMax?.let { convertTempToCelsius(it) } ?: 0f,
         dateTime = dateTimeEpoch?.let { convertEpochTimeToFormattedDateTime(it) } ?: "",
         hourlyForecastData = hours?.toHourlyForecastListData() ?: listOf(),
-        icon = icon?.let { getIconUrl(it) } ?: ""
+        icon = icon?.let { getIconUrl(it) } ?: "",
+        day = dateTimeEpoch?.let { epochSecondsToDayString(it) } ?: ""
     )
 
 fun List<CurrentWeatherResponseV2>.toWeatherForecastListData(): List<WeatherForecastData> {
@@ -118,8 +123,8 @@ fun CurrentWeatherResponseV2.toCurrentWeatherData(): CurrentWeatherDataV2 =
     CurrentWeatherDataV2(
         dateTime = dateTimeEpoch?.let { convertEpochTimeToFormattedDateTime(it) } ?: "",
         dateTimeEpoch = dateTimeEpoch?.let { convertEpochTimeToFormattedDateTime(it) } ?: "",
-        feelsLikeTemp = feelsLikeTemp?.let { convertTempToCelsius(it) } ?: 0.0,
-        temperature = temperature?.let { convertTempToCelsius(it) } ?: 0.0,
+        feelsLikeTemp = feelsLikeTemp?.let { convertTempToCelsius(it) } ?: 0f,
+        temperature = temperature?.let { convertTempToCelsius(it) } ?: 0f,
         icon = icon?.let { getIconUrl(it) } ?: "",
         weatherCondition = weatherCondition ?: "",
         weatherDetailItems = this.toWeatherDetailItems(false),
