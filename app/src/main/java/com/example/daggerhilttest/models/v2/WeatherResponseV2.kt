@@ -14,6 +14,7 @@ data class WeatherResponseV2(
 fun WeatherResponseV2.toWeatherData() =
     WeatherDataV2(
         currentWeather = this.currentWeather.toCurrentWeatherData(),
-        weatherForecast = this.weatherForecast.toWeatherForecastListData()
+        weatherForecast = this.weatherForecast.toWeatherForecastListData(),
+        graphPoints = this.weatherForecast.toGraphPointsList()
     )
 
