@@ -63,7 +63,6 @@ import com.example.daggerhilttest.ui.theme.productSans
 import com.example.daggerhilttest.ui.theme.purpleBgColor
 import com.example.daggerhilttest.ui.theme.purpleWeatherItemColor
 import com.example.daggerhilttest.ui_components.CurrentWeatherGraphV2
-import com.example.daggerhilttest.ui_components.GraphPoints
 import com.example.daggerhilttest.ui_components.SearchBarV2
 import com.example.daggerhilttest.util.WeatherExtraDetailType
 
@@ -73,7 +72,7 @@ val purpleColor = Color(0xFFEBDEFF)
 fun CurrentWeatherScreenBottomSheetContent(
     currentWeather: CurrentWeatherDataV2,
     hourlyForecast: List<HourlyForecastDataV2>,
-    dayForecast: List<WeatherForecastData>
+    dayForecast: List<com.example.daggerhilttest.models.v2.GraphPoints>
 ) {
     LazyColumn(
         modifier = Modifier.background(color = purpleBgColor),
@@ -100,18 +99,7 @@ fun CurrentWeatherScreenBottomSheetContent(
         }
         item {
             Log.d("column_tag", dayForecast.size.toString())
-            val list: List<GraphPoints> = remember {
-                listOf(
-                    GraphPoints(temp = 33f, "Mon"),
-                    GraphPoints(temp = 32f, "Tue"),
-                    GraphPoints(temp = 29f, "Wed"),
-                    GraphPoints(temp = 30f, "Thu"),
-                    GraphPoints(temp = 32f, "Fri"),
-                    GraphPoints(temp = 28f, "Sat"),
-                    GraphPoints(temp = 34f, "Sun"),
-                )
-            }
-            CurrentWeatherGraphV2(graphPoints = list)
+            CurrentWeatherGraphV2(graphPoints = dayForecast)
         }
         item {
             WeatherDetailsGridView(

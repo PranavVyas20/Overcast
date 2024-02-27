@@ -36,6 +36,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.daggerhilttest.models.v2.GraphPoints
 import com.example.daggerhilttest.screens.purpleColor
 import com.example.daggerhilttest.ui.theme.productSans
 
@@ -184,7 +185,7 @@ fun CustomGraphPreview() {
     CurrentWeatherGraphV2(graphPoints = list)
 }
 
-private fun generateSmoothPath(list: List<GraphPointsV2>, size: Size): Path {
+private fun generateSmoothPath(list: List<GraphPointsMapped>, size: Size): Path {
     val path = Path()
     var prevX = list[0].dayyX
     var prevY = list[0].temppY
@@ -207,10 +208,8 @@ private fun generateSmoothPath(list: List<GraphPointsV2>, size: Size): Path {
     return path
 }
 
-data class GraphPoints(val temp: Float, val day: String)
-
 // Graph points range mapped to canvas size
-data class GraphPointsV2(val dayyX: Float, val temppY: Float)
+data class GraphPointsMapped(val dayyX: Float, val temppY: Float)
 
 fun mapValue(
     value: Float,
@@ -228,7 +227,7 @@ fun mapValue(
 
 fun createRangedList(
     graphPoints: List<GraphPoints>, size: Size, widthFactor: Float, heightFactor: Float
-): List<GraphPointsV2> {
+): List<GraphPointsMapped> {
     return graphPoints.mapIndexed { index, points ->
         val y = mapValue(value = points.temp, fromRangeStart = graphPoints.maxOf {
             it.temp
@@ -249,7 +248,7 @@ fun createRangedList(
             // basically giving the spacing between canvas end and curve
             toRangeEnd = size.width
         )
-        GraphPointsV2(
+        GraphPointsMapped(
             dayyX = x, temppY = y
         )
     }
