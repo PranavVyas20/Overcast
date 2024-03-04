@@ -10,7 +10,7 @@ WeatherBee is an android app made with Jetpack compose and kotlin that show weat
 
 - [MVVM](https://developer.android.com/jetpack/guide)
 
-- [Dagger-Hilt](https://developer.android.com/training/dependency-injection/hilt-android) 
+- [Dagger-Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
 
 - [Coroutines](https://developer.android.com/kotlin/coroutines)
 
@@ -34,25 +34,14 @@ WeatherBee is an android app made with Jetpack compose and kotlin that show weat
 
 ## Screenshots:
 
-<table>
-  <tr>
-     <td>Access user's location</td>
-     <td>Home Screen</td>
-     <td>Search for location</td>
-  </tr>
-  <tr>
-    <td><img src="ss/location.png" width=270 height=480></td>
-    <td><img src="ss/homescreen.png" width=270 height=480></td> 
-    <td><img src="ss/searchLocation.png" width=270 height=480></td>
-  </tr>
- </table>
+![Screenshot](ss/weather_app.png)
 
 - TODO'S
-- [ ] Fonts
-- [ ] Replace older UI with new one
-- [ ] Create new search bar and suggestion box
-- [ ] Background api call
-- [ ] Create notification 
-- [ ] Create a side bar  that contains:
-  - [ ] Primary Color picker
-  - [ ] Notification duration
+- [x] Fonts
+- [x] New google material theme UI
+- [x] Create new search bar and suggestion box
+- [x] Remove charts library and draw graph on canvas
+- [ ] Remove saving location in pref datastore
+- [ ] 15 Day forecast UI
+- [ ] Setup workmanager for periodically fetching weather data and create notification
+- [ ] Create a nice loading animation 
