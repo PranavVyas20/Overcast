@@ -176,6 +176,7 @@ fun CustomGraphPreview() {
             GraphPoints(temp = 33f, "Mon"),
             GraphPoints(temp = 32f, "Tue"),
             GraphPoints(temp = 29f, "Wed"),
+
             GraphPoints(temp = 30f, "Thu"),
             GraphPoints(temp = 32f, "Fri"),
             GraphPoints(temp = 28f, "Sat"),
