@@ -17,6 +17,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 data class CurrentWeatherResponseV2(
@@ -56,7 +57,7 @@ data class CurrentWeatherResponseV2(
 
 private fun convertTempToCelsius(kFarenheit: Float): Float {
     val cel = ((kFarenheit - 32) * 5) / 9
-    return (cel * 10.0).roundToInt() / 10.0.toFloat()
+    return round(cel)
 }
 
 private fun convertTo12HourFormat(

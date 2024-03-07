@@ -57,6 +57,7 @@ import com.example.daggerhilttest.R
 import com.example.daggerhilttest.models.PlaceSuggestion
 import com.example.daggerhilttest.models.v2.CurrentWeatherDataV2
 import com.example.daggerhilttest.models.v1.WeatherExtraDetailItem
+import com.example.daggerhilttest.models.v2.GraphPoints
 import com.example.daggerhilttest.models.v2.HourlyForecastDataV2
 import com.example.daggerhilttest.models.v2.WeatherForecastData
 import com.example.daggerhilttest.ui.theme.productSans
@@ -72,7 +73,7 @@ val purpleColor = Color(0xFFEBDEFF)
 fun CurrentWeatherScreenBottomSheetContent(
     currentWeather: CurrentWeatherDataV2,
     hourlyForecast: List<HourlyForecastDataV2>,
-    dayForecast: List<com.example.daggerhilttest.models.v2.GraphPoints>
+    dayForecast: List<GraphPoints>
 ) {
     LazyColumn(
         modifier = Modifier.background(color = purpleBgColor),
