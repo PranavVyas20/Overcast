@@ -69,7 +69,7 @@ class WeatherViewModel @Inject constructor(
             placeSuggestions.clear()
             viewModelScope.launch {
                 place.latLng?.let {
-                    getWeather(it.latitude, it.longitude, true)
+                    getWeather(it.latitude.toFloat(), it.longitude.toFloat(), true)
                 }
             }
         }.addOnFailureListener { exception: Exception ->
@@ -121,7 +121,7 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    fun getLocationFromGeocoding(lat: Double, long: Double) {
+    fun getLocationFromGeocoding(lat: Float, long: Float) {
         viewModelScope.launch {
             weatherRepository.getLocationFromGeocoding(lat, long).collect { response ->
                 Log.d("geocoding-response", response.toString())
@@ -148,7 +148,7 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    fun getWeather(lat: Double, long: Double, fromAutoSuggest: Boolean = false) {
+    fun getWeather(lat: Float, long: Float, fromAutoSuggest: Boolean = false) {
         viewModelScope.launch {
             weatherRepository.getWeather(lat, long).collect { response ->
                 when (response) {

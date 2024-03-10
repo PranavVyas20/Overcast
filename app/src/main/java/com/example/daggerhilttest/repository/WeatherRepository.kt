@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.flow
 
 class WeatherRepository(private val weatherApi: WeatherApi) : BaseApiResponse() {
 
-    suspend fun getWeather(lat: Double, long: Double): Flow<Resource_v2<WeatherResponseV2>> {
+    suspend fun getWeather(lat: Float, long: Float): Flow<Resource_v2<WeatherResponseV2>> {
         return flow {
             emit(Resource_v2.Loading())
             emit(
@@ -27,8 +27,8 @@ class WeatherRepository(private val weatherApi: WeatherApi) : BaseApiResponse() 
     }
 
     suspend fun getLocationFromGeocoding(
-        lat: Double,
-        long: Double
+        lat: Float,
+        long: Float
     ): Flow<Resource_v2<List<GeocodingResponseV2>>> {
         return flow {
             emit(Resource_v2.Loading())

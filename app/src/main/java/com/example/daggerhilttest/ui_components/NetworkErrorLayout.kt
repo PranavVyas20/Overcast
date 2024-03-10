@@ -19,9 +19,9 @@ import kotlin.reflect.KSuspendFunction2
 
 @Composable
 fun NetworkErrorLayout(
-    currentLat: Double,
-    currentLong: Double,
-    onRetry: suspend (Double, Double) -> Unit
+    currentLat: Float,
+    currentLong: Float,
+    onRetry: suspend (Float, Float) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     Column(
