@@ -106,7 +106,8 @@ fun CurrentWeatherScreenContent(
             CurrentWeatherScreenBottomSheetContent(
                 currentWeather = currentWeatherData.currentWeather,
                 hourlyForecast = currentWeatherData.weatherForecast.first().hourlyForecastData,
-                dayForecast = currentWeatherData.graphPoints.take(7)
+                dayForecast = currentWeatherData.graphPoints.take(7),
+                twoWeeksForecastData = currentWeatherData.weatherForecast
             )
         }) {
 
