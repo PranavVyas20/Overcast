@@ -1,6 +1,5 @@
 package com.example.daggerhilttest.remote
 
-import com.example.daggerhilttest.constants.Constants
 import com.example.daggerhilttest.models.v1.CurrentWeather
 import com.example.daggerhilttest.models.v1.HourlyForecast
 import com.example.daggerhilttest.models.v2.GeocodingResponseV2
