@@ -93,11 +93,9 @@ dependencies {
     kapt "androidx.hilt:hilt-compiler:1.0.0"
     implementation 'androidx.hilt:hilt-navigation-compose:1.0.0'
 
-
     implementation "com.google.accompanist:accompanist-placeholder:0.25.1"
     implementation "io.coil-kt:coil-compose:2.4.0"
     implementation("io.coil-kt:coil-svg:2.4.0")
-
 
     // Provides the utilities needed to use Vico in Jetpack Compose.
     implementation "com.patrykandpatryk.vico:compose:1.4.3"
@@ -122,13 +120,9 @@ dependencies {
     // Places api
     implementation 'com.google.android.libraries.places:places:3.3.0'
 
-    // Custom simple toast
-    implementation 'com.shamanland:xdroid-toaster:0.0.10'
-
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
     implementation "androidx.compose.runtime:runtime-tracing:1.0.0-beta01"
 
-    implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
-    kapt "com.github.permissions-dispatcher:permissionsdispatcher-processor:4.9.2"
-
+    // work manager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }
