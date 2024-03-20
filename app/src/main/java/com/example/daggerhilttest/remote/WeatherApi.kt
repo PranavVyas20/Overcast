@@ -15,8 +15,8 @@ interface WeatherApi {
 
     @GET("VisualCrossingWebServices/rest/services/timeline/{latitude},{longitude}")
     suspend fun getWeatherData(
-        @Path("latitude") latitude: Double,
-        @Path("longitude") longitude: Double,
+        @Path("latitude") latitude: Float,
+        @Path("longitude") longitude: Float,
         @Query("key") apiKey: String,
     ): Response<WeatherResponseV2>
 
@@ -24,8 +24,8 @@ interface WeatherApi {
     @GET
     suspend fun getLocationFromGeocoding(
         @Url url: String,
-        @Query("lat") lat: Double,
-        @Query("lon") long: Double,
+        @Query("lat") lat: Float,
+        @Query("lon") long: Float,
         @Query("appid") apiKey: String,
     ): Response<List<GeocodingResponseV2>>
 
