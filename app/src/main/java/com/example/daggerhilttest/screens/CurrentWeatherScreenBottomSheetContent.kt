@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,43 +74,62 @@ val purpleColor = Color(0xFFEBDEFF)
 fun CurrentWeatherScreenBottomSheetContent(
     currentWeather: CurrentWeatherDataV2,
     hourlyForecast: List<HourlyForecastDataV2>,
-    dayForecast: List<GraphPoints>
+    dayForecast: List<GraphPoints>,
+    twoWeeksForecastData: List<WeatherForecastData>
 ) {
+    var showCurrentWeatherData by remember {
+        mutableStateOf(true)
+    }
     LazyColumn(
         modifier = Modifier.background(color = purpleBgColor),
         contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 16.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         item {
-            ButtonsLayout()
+            ButtonsLayout { todayBtnSelected ->
+                showCurrentWeatherData = todayBtnSelected
+            }
         }
-        item {
-            WeatherDetailsGridView(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                noOfItemsInRow = 2,
-                weatherDetailItems = currentWeather.weatherDetailItems
-            )
+        if (showCurrentWeatherData) {
+            item {
+                WeatherDetailsGridView(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    noOfItemsInRow = 2,
+                    weatherDetailItems = currentWeather.weatherDetailItems
+                )
+            }
+
+            item {
+                HourlyForecastView(
+                    hourlyForecast = hourlyForecast
+                )
+
+            }
+            item {
+                Log.d("column_tag", dayForecast.size.toString())
+                CurrentWeatherGraphV2(graphPoints = dayForecast)
+            }
+            item {
+                WeatherDetailsGridView(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    noOfItemsInRow = 2,
+                    weatherDetailItems = currentWeather.sunsetSunriseWeatherItems
+                )
+            }
+        } else {
+            items(twoWeeksForecastData) { weeklyWeatherData ->
+                WeeklyForecastItem(
+                    formattedDayDate = weeklyWeatherData.dateTime,
+                    weatherStatus = "status",
+                    minTemp = weeklyWeatherData.minTemp,
+                    maxTemp = weeklyWeatherData.maxTemp,
+                    weatherIconUrl = weeklyWeatherData.icon
+                )
+            }
         }
 
-        item {
-            HourlyForecastView(
-                hourlyForecast = hourlyForecast
-            )
-
-        }
-        item {
-            Log.d("column_tag", dayForecast.size.toString())
-            CurrentWeatherGraphV2(graphPoints = dayForecast)
-        }
-        item {
-            WeatherDetailsGridView(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                noOfItemsInRow = 2,
-                weatherDetailItems = currentWeather.sunsetSunriseWeatherItems
-            )
-        }
     }
 }
 
@@ -403,10 +423,9 @@ fun PrimaryButton(text: String, isSelected: Boolean, onClick: () -> Unit, modifi
     }
 }
 
-@Preview
 @Composable
-fun ButtonsLayout() {
-    var isTodayBtnSelected by remember {
+fun ButtonsLayout(onButtonClick: (Boolean) -> Unit) {
+    var isTodayBtnSelected by rememberSaveable {
         mutableStateOf(true)
     }
 
@@ -418,13 +437,19 @@ fun ButtonsLayout() {
         PrimaryButton(
             text = "Today",
             isSelected = isTodayBtnSelected,
-            onClick = { isTodayBtnSelected = true },
+            onClick = {
+                isTodayBtnSelected = true
+                onButtonClick(true)
+            },
             modifier = Modifier.weight(1f)
         )
         PrimaryButton(
             text = "15 Days",
             isSelected = !isTodayBtnSelected,
-            onClick = { isTodayBtnSelected = false },
+            onClick = {
+                isTodayBtnSelected = false
+                onButtonClick(false)
+            },
             modifier = Modifier.weight(1f)
         )
     }
@@ -520,67 +545,61 @@ fun HourlyForecastView(
 }
 
 @Composable
-fun HourlyForecastGraph(paddingValues: PaddingValues, dayForecast: List<WeatherForecastData>) {
-    // Convert dayforecast to graph points here !!!
-    HourlyGraph(
-        dayForecast = dayForecast,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(paddingValues = paddingValues)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = Color(0xFFEBDEFF))
-    )
-}
-
-@Preview
-@Composable
-fun WeeklyForecastItem() {
+fun WeeklyForecastItem(
+    formattedDayDate: String,
+    weatherStatus: String,
+    minTemp: Float,
+    maxTemp: Float,
+    weatherIconUrl: String
+) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = Color(0xFFEBDEFF), shape = RoundedCornerShape(16.dp))
     ) {
-        val (date, weather, maxTemp, minTemp, seperator, icon) = createRefs()
-        Text("Thursday, Jan 19",
+        val (dateTv, weatherTv, maxTempTv, minTempTv, seperator, weatherIv) = createRefs()
+        Text(formattedDayDate,
             fontSize = 16.sp,
             fontFamily = productSans,
             letterSpacing = 0.15.sp,
             fontWeight = FontWeight(400),
-            modifier = Modifier.constrainAs(date) {
+            modifier = Modifier.constrainAs(dateTv) {
                 top.linkTo(parent.top, margin = 15.dp)
                 start.linkTo(parent.start, margin = 16.dp)
             })
 
-        Text("Cloudy",
+        Text(weatherStatus,
             color = Color(0xFF494649),
             fontSize = 16.sp,
             fontFamily = productSans,
             letterSpacing = 0.15.sp,
             fontWeight = FontWeight(400),
-            modifier = Modifier.constrainAs(weather) {
-                top.linkTo(date.bottom, margin = 3.dp)
-                start.linkTo(date.start)
+            modifier = Modifier.constrainAs(weatherTv) {
+                top.linkTo(dateTv.bottom, margin = 3.dp)
+                start.linkTo(dateTv.start)
                 bottom.linkTo(parent.bottom, margin = 18.dp)
             })
 
-        Box(modifier = Modifier
-            .height(54.dp)
-            .width(54.dp)
-            .clip(CircleShape)
-            .background(Color.White)
-            .constrainAs(icon) {
-                end.linkTo(parent.end, margin = 8.dp)
-                top.linkTo(parent.top, margin = 14.dp)
-                bottom.linkTo(parent.bottom, margin = 14.dp)
-            })
+        AsyncImage(
+            modifier = Modifier
+                .size(54.dp)
+                .constrainAs(weatherIv) {
+                    end.linkTo(parent.end, margin = 8.dp)
+                    top.linkTo(parent.top, margin = 14.dp)
+                    bottom.linkTo(parent.bottom, margin = 14.dp)
+                },
+            model = ImageRequest.Builder(LocalContext.current).data(weatherIconUrl)
+                .decoderFactory(factory = SvgDecoder.Factory()).build(),
+            contentDescription = null
+        )
 
         Box(modifier = Modifier
             .background(Color.Black)
             .width(1.dp)
             .constrainAs(seperator) {
-                top.linkTo(icon.top)
-                end.linkTo(icon.start, margin = 20.dp)
-                bottom.linkTo(icon.bottom)
+                top.linkTo(weatherIv.top)
+                end.linkTo(weatherIv.start, margin = 20.dp)
+                bottom.linkTo(weatherIv.bottom)
                 height = Dimension.fillToConstraints
             })
         Text(buildAnnotatedString {
@@ -592,7 +611,7 @@ fun WeeklyForecastItem() {
                     fontWeight = FontWeight(400)
                 )
             ) {
-                append("3")
+                append(maxTemp.toInt().toString())
             }
             withStyle(
                 style = SpanStyle(
@@ -604,9 +623,9 @@ fun WeeklyForecastItem() {
             ) {
                 append("°")
             }
-        }, modifier = Modifier.constrainAs(maxTemp) {
+        }, modifier = Modifier.constrainAs(maxTempTv) {
             end.linkTo(seperator.start, margin = 10.dp)
-            top.linkTo(date.top)
+            top.linkTo(dateTv.top)
         })
 
         Text(buildAnnotatedString {
@@ -618,7 +637,7 @@ fun WeeklyForecastItem() {
                     fontWeight = FontWeight(400)
                 )
             ) {
-                append("-4")
+                append(minTemp.toInt().toString())
             }
             withStyle(
                 style = SpanStyle(
@@ -630,9 +649,9 @@ fun WeeklyForecastItem() {
             ) {
                 append("°")
             }
-        }, modifier = Modifier.constrainAs(minTemp) {
+        }, modifier = Modifier.constrainAs(minTempTv) {
             end.linkTo(seperator.start, margin = 10.dp)
-            bottom.linkTo(weather.bottom)
+            bottom.linkTo(weatherTv.bottom)
         })
     }
 }
@@ -681,5 +700,23 @@ fun WeatherDetailsGridViewPreview() {
             )
         )
     )
+}
+
+@Composable
+@Preview
+fun WeeklyWeatherItemPreview() {
+    WeeklyForecastItem(
+        formattedDayDate = "thursday, jan 12",
+        weatherStatus = "Cloudy",
+        minTemp = -3f,
+        maxTemp = 2f,
+        weatherIconUrl = ""
+    )
+}
+
+@Composable
+@Preview
+fun ButtonsLayoutPreview() {
+    ButtonsLayout {}
 }
 
