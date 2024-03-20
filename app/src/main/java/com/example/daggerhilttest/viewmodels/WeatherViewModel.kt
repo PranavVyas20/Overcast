@@ -79,7 +79,7 @@ class WeatherViewModel @Inject constructor(
 
     fun tryAutoComplete(query: String) {
         autoCompleteJob?.cancel()
-        viewModelScope.launch {
+        autoCompleteJob = viewModelScope.launch {
             Log.d("auto-complete-tag", "fun called")
             val token = AutocompleteSessionToken.newInstance()
             val request =
