@@ -41,7 +41,7 @@ Overcast is an android app made with Jetpack compose and kotlin that show weathe
 - [x] New google material theme UI
 - [x] Create new search bar and suggestion box
 - [x] Remove charts library and draw graph on canvas
-- [ ] Remove saving location in pref datastore
-- [ ] 15 Day forecast UI
+- [x] Remove saving location in pref datastore
+- [x] 15 Day forecast UI
 - [ ] Setup workmanager for periodically fetching weather data and create notification
 - [ ] Create a nice loading animation 
