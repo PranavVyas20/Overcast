@@ -1,5 +1,6 @@
 package com.example.daggerhilttest.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.BackdropScaffold
@@ -23,15 +24,16 @@ import com.example.daggerhilttest.ui_components.NetworkErrorLayout
 import com.example.daggerhilttest.viewmodels.WeatherViewModel
 
 @Composable
-fun CurrentWeatherScreenV2(weatherViewModel: WeatherViewModel) {
+fun CurrentWeatherScreenV2(weatherViewModel: WeatherViewModel, currentLat: Float, currentLong: Float) {
     val currentLocationState =
         weatherViewModel.currentLocationState.collectAsStateWithLifecycle().value
     val currentWeatherState =
         weatherViewModel.currentWeatherStateV3.collectAsStateWithLifecycle().value
 
     LaunchedEffect(key1 = Unit) {
-        weatherViewModel.getWeather(26.3609, 75.9289)
-        weatherViewModel.getLocationFromGeocoding(26.3609, 75.9289)
+        Log.d("location_tag", "lat = $currentLat, long = $currentLong")
+        weatherViewModel.getWeather(currentLat, currentLong)
+        weatherViewModel.getLocationFromGeocoding(currentLat, currentLong)
     }
 
     when (currentWeatherState) {
@@ -60,7 +62,7 @@ fun CurrentWeatherScreenV2(weatherViewModel: WeatherViewModel) {
         }
 
         is WeatherViewModel.UIState.Error -> {
-            NetworkErrorLayout(26.3609, 75.9289, onRetry = weatherViewModel::getWeather)
+            NetworkErrorLayout(26.3f, 75.9f, onRetry = weatherViewModel::getWeather)
         }
 
         is WeatherViewModel.UIState.Loading -> {
