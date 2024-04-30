@@ -127,7 +127,6 @@ class WeatherViewModel @Inject constructor(
                 Log.d("geocoding-response", response.toString())
                 when (response) {
                     is Resource_v2.Error -> {
-
                         currentLocationState.value = UIState.Error(
                             message = response.message ?: "Some error occurred"
                         )
@@ -135,7 +134,6 @@ class WeatherViewModel @Inject constructor(
 
                     is Resource_v2.Loading -> {
                         currentLocationState.value = UIState.Loading()
-
                     }
 
                     is Resource_v2.Success -> {
@@ -148,30 +146,22 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
+    fun getGeolocation() {
+        viewModelScope.launch {
+            weatherRepository.getGeolocation()
+                .onSuccess {
+                    Log.d("geolocation_tag","$it")
+                }.onFailure {
+                    Log.d("geolocation_tag","${it.message}")
+                }
+        }
+    }
     fun getWeather(lat: Float, long: Float, fromAutoSuggest: Boolean = false) {
         viewModelScope.launch {
-            weatherRepository.getWeather(lat, long).collect { response ->
-                when (response) {
-                    is Resource_v2.Error -> {
-                        currentWeatherStateV3.value = UIState.Error(
-                            message = response.message ?: "Some error occurred"
-                        )
-                    }
-
-                    is Resource_v2.Loading -> {
-                        currentWeatherStateV3.value = UIState.Loading()
-
-                    }
-
-                    is Resource_v2.Success -> {
-                        currentWeatherStateV3.value = UIState.Success(
-                            data = response.data.toWeatherData()
-                        )
-                        if(fromAutoSuggest) {
-                            getLocationFromGeocoding(lat, long)
-                        }
-                    }
-                }
+            weatherRepository.getWeather(lat, long).onSuccess {
+                currentWeatherStateV3.value = UIState.Success(data = it.toWeatherData())
+            }.onFailure {
+                currentWeatherStateV3.value = UIState.Error(message = it.message)
             }
         }
     }

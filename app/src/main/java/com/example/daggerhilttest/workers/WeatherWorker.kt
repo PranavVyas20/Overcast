@@ -27,9 +27,15 @@ import com.example.daggerhilttest.repository.WeatherRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.yield
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -91,40 +97,29 @@ class WeatherWorker @AssistedInject constructor(
     ) == PackageManager.PERMISSION_GRANTED
 
     @SuppressLint("MissingPermission")
-    private suspend fun getWeatherData(location: Location) {
+    private suspend fun getWeatherData(location: Location) =
         weatherRepository.getWeather(
             lat = location.latitude.toFloat(),
             long = location.longitude.toFloat()
-        ).onSuccess {
-            Log.d("worker_tag", "$it")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        )
+
+
+    @SuppressLint("MissingPermission")
+    override suspend fun doWork(): Result {
+        Log.d("worker_tag", "work started")
+        locationManager.getLastKnownLocation().onSuccess {
+            Log.d("worker_tag", "got location")
+            getWeatherData(location = it).onSuccess {
                 if (hasNotificationPermission()) {
                     with(NotificationManagerCompat.from(applicationContext)) {
                         notify(0, createNotification())
                     }
-                }
-            } else {
-                with(NotificationManagerCompat.from(applicationContext)) {
-                    notify(0, createNotification())
+                    return Result.success()
                 }
             }
+        }.onFailure {
+            Log.d("worker_tag", "error in location: ${it.message}")
         }
-            .onFailure {
-                Log.d("worker_tag", "${it.message}")
-            }
-    }
-
-    override suspend fun doWork(): Result {
-        Log.d("worker_tag", "work started")
-        // todo get lat long from last known location or datastore preferences
-        locationManager.getLastKnownLocation().onSuccess { location ->
-            Log.d("worker_tag_v2", "got location: $location")
-            getWeatherData(location.result)
-            return Result.success()
-        }.onFailure { exception ->
-            Log.d("worker_tag_v2", "error in location: ${exception.message}")
-            return Result.failure()
-        }
-        return Result.success()
+        return Result.failure()
     }
 }

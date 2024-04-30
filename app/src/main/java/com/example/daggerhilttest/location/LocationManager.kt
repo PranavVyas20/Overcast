@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,7 +17,7 @@ class LocationManager
         LocationServices.getFusedLocationProviderClient(applicationContext)
 
     @SuppressLint("MissingPermission")
-    fun getLastKnownLocation() = runCatching {
-        fusedLocationClient.lastLocation
+    suspend fun getLastKnownLocation() = runCatching {
+        fusedLocationClient.lastLocation.await()
     }
 }

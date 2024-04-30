@@ -8,19 +8,24 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,6 +39,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
 import com.example.daggerhilttest.R
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -43,6 +50,7 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 
+@SuppressLint("InlinedApi")
 @Composable
 fun FetchLocationScreen(onLocationFetch: (lat: Double, lng: Double) -> Unit) {
     val context = LocalContext.current
@@ -52,13 +60,28 @@ fun FetchLocationScreen(onLocationFetch: (lat: Double, lng: Double) -> Unit) {
     val locationProviderClient = remember {
         LocationServices.getFusedLocationProviderClient(context)
     }
-    val locationPermissions = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION
-    )
+    val locationPermissions = buildList {
+        addAll(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            )
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            add(
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+        }
+    }
+
+    Log.d("list_tag", "$locationPermissions")
     var flag by remember {
         mutableIntStateOf(0)
     }
     var showButton by remember {
+        mutableStateOf(false)
+    }
+    var showBackgroundLocationDialog by remember {
         mutableStateOf(false)
     }
     val enableLocationDialogLauncher =
@@ -72,32 +95,63 @@ fun FetchLocationScreen(onLocationFetch: (lat: Double, lng: Double) -> Unit) {
                             onLocationFetch(lat, lng)
                         })
                 } else {
-                    Toast.makeText(context, "Location is required to continue", Toast.LENGTH_SHORT).show()
+                    // Basically re-show the popup
+                    Toast.makeText(context, "Location is required to continue", Toast.LENGTH_SHORT)
+                        .show()
                     flag++
                 }
             })
 
+    fun locationSettingsRequest() = displayLocationSettingsRequest(
+        context = context,
+        intentSenderRequestCallback = {
+            enableLocationDialogLauncher.launch(it)
+        },
+        locationPresentCallback = {
+            getCurrentLocation(locationClient = locationProviderClient,
+                context = context,
+                locationCallback = { lat, lng ->
+                    Toast.makeText(context, "$lat, $lng", Toast.LENGTH_SHORT).show()
+                    onLocationFetch(lat, lng)
+                })
+        })
+
+    val backgroundLocationPermissionLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { permissionGranted ->
+            if (permissionGranted) {
+                Toast.makeText(context, "Bg location permission granted", Toast.LENGTH_SHORT).show()
+                locationSettingsRequest()
+            } else {
+                Toast.makeText(
+                    context,
+                    "Bg location permission not granted, notifications will not be shown",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     val locationPermissionLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions(),
             onResult = { permissions ->
-                val permissionsGranted = permissions.values.reduce { acc, isPermissionGranted ->
-                    acc && isPermissionGranted
+                val approxLocationPermissionGranted =
+                    permissions.getValue(Manifest.permission.ACCESS_COARSE_LOCATION)
+                val preciseLocationPermissionGranted =
+                    permissions.getValue(Manifest.permission.ACCESS_FINE_LOCATION)
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val notificationPermissionGranted: Boolean =
+                        permissions.getValue(Manifest.permission.POST_NOTIFICATIONS)
                 }
+
+                val permissionsGranted =
+                    approxLocationPermissionGranted || preciseLocationPermissionGranted
+
                 if (permissionsGranted) {
-                    displayLocationSettingsRequest(context = context,
-                        intentSenderRequestCallback = {
-                            enableLocationDialogLauncher.launch(it)
-                        },
-                        locationPresentCallback = {
-                            getCurrentLocation(locationClient = locationProviderClient,
-                                context = context,
-                                locationCallback = { lat, lng ->
-                                    Toast.makeText(context, "$lat, $lng", Toast.LENGTH_SHORT).show()
-                                    onLocationFetch(lat, lng)
-                                })
-                        })
+                    // show a dialog to enable background location by sending the user to the settings
+                    showBackgroundLocationDialog = true
                 } else {
-                    if (activity?.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) == true) {
+                    if (activity?.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) == true ||
+                        activity?.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_COARSE_LOCATION) == true
+                    ) {
                         Toast.makeText(context, "else", Toast.LENGTH_SHORT).show()
                         flag++
                         return@rememberLauncherForActivityResult
@@ -114,13 +168,44 @@ fun FetchLocationScreen(onLocationFetch: (lat: Double, lng: Double) -> Unit) {
             })
 
     LaunchedEffect(key1 = flag) {
-        locationPermissionLauncher.launch(locationPermissions)
+        locationPermissionLauncher.launch(locationPermissions.toTypedArray())
     }
-    Box(modifier = Modifier.fillMaxSize().background(color = Color(0xFFDED0E5)), contentAlignment = Alignment.Center) {
-        Image(painter = painterResource(id = R.drawable.overcast_splash), contentDescription = "splash_image")
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color(0xFFDED0E5)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.overcast_splash),
+            contentDescription = "splash_image"
+        )
+    }
+    if (showBackgroundLocationDialog && !hasBackgroundLocationPermission(context)) {
+        AlertDialog(
+            onDismissRequest = { showBackgroundLocationDialog = false },
+            title = {
+                Text(text = "App needs to access the device location in background for notifications")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                }) {
+                    Text(text = "Allow")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showBackgroundLocationDialog = false
+                    locationSettingsRequest()
+                }) {
+                    Text(text = "Deny")
+                }
+            }
+        )
     }
     if (showButton) {
-        Button(onClick = { locationPermissionLauncher.launch(locationPermissions) }) {
+        Button(onClick = { locationPermissionLauncher.launch(locationPermissions.toTypedArray()) }) {
             Text("Enable location by settings")
         }
     }
@@ -188,10 +273,23 @@ fun Context.findActivity(): Activity? {
     return null
 }
 
+@SuppressLint("InlinedApi")
+fun hasBackgroundLocationPermission(context: Context) = ActivityCompat.checkSelfPermission(
+    context,
+    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+) == PackageManager.PERMISSION_GRANTED
 @Preview
 @Composable
 fun SplashPreview() {
-    Box(modifier = Modifier.fillMaxSize().background(color = Color(0xFFDED0E5)), contentAlignment = Alignment.Center) {
-        Image(painter = painterResource(id = R.drawable.overcast_splash), contentDescription = "splash_image")
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color(0xFFDED0E5)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.overcast_splash),
+            contentDescription = "splash_image"
+        )
     }
 }
